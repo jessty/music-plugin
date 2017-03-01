@@ -2,6 +2,7 @@
  * Created by Y-Star on 2017/2/10.
  */
 function btn_move(el, mouseLeft, mouseTop){
+
     var leftRnd = (Math.random()-0.5)*20;
     var topRnd = (Math.random()-0.5)*20;
     var btnLeft = mouseLeft+(leftRnd>0?100:-100)+leftRnd;
