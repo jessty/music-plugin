@@ -1,0 +1,30 @@
+{
+  "manifest_version": 2,
+  "name": "music",
+  "version": "0.3",
+
+  "description": "A Simple Music Plug-in",
+  "icons": {
+    "16": "pics/icon19.png",
+    "48": "pics/icon48.png",
+    "128": "pics/icon128.png"
+  },
+  "browser_action":{
+    "default_icon": {
+      "19": "pics/icon19.png",
+      "38": "pics/icon38.png"
+    },
+    "default_title": "Music",
+    "default_popup": "popup.html"
+  },
+  "background":{
+    "scripts":[
+      "js/test.js"
+    ]
+  },
+  "permissions":[
+    "storage"
+  ]
+
+
+}
