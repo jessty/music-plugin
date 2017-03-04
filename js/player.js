@@ -1,6 +1,7 @@
 /**
  * Created by Y-Star on 2017/2/24.
  */
+sharedData、、、
 function Player(){
   this.audio = document.createElement('audio');
   this.audio.onended = function(){

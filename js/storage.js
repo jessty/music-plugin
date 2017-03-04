@@ -1,40 +1,48 @@
 /**
  * Created by Y-Star on 2017/2/23.
  */
-function Storage(){
-
+function Storage(sharedData){
+  //获取外界对象，以获得对它的操作权
+  this.$sharedData = sharedData;
 }
 Storage.prototype = {
   collections:[],
   // 收藏歌曲
-  collect:function (song) {
+  collect:function (song,callback) {
     var obj = {};
     if('songID' in song)
       obj[song.songID] = song;
     else
       obj[song.songSrc] = song;
     chrome.storage.local.set(obj,function () {
+      callback('歌曲已收藏');
+      this.$sharedData.collections = this.collections = undefined;//缓存的收藏夹设为失效
       console.log('collect OK!');
     });
   },
 
   // 从收藏列表中移除歌曲
-  abandon:function (id) {
+  abandon:function (id,callback) {
     chrome.storage.local.remove(id,function () {
+      callback('歌曲已删除');
+      this.$sharedData.collections = this.collections = undefined;//缓存的收藏夹设为失效
       console.log('abandon OK');
     });
   },
 
-  // 首次从在chrome.storage中储存的收藏夹中加载所有歌曲
-  // 只执行一次，在用户第一次点击收藏夹时，之后维护好所加载的歌曲列表
-  load:function () {
+  // 从在chrome.storage中储存的收藏夹中加载所有歌曲
+  load:function (callback) {
     this.collections = [];
-    chrome.storage.local.get(null,objToArray);
-    function objToArray(obj) {
+    var objToArray = function (callback,obj) {
       for(var item in obj){
         this.collections.push(obj[item]);
       }
-    }
+      if(callback !== undefined)
+        callback(this.collections);
+      this.$sharedData.collections = this.collections;
+    };
+    objToArray = objToArray.bind(this,callback);
+    chrome.storage.local.get(null,objToArray);
   }
 }
 
