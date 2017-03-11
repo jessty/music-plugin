@@ -64,7 +64,8 @@ Network.prototype = {
 
       //回调，在该程序中，callback实际是chrome插件中用于页面通信的sendResponse
       //具体是chrome.runtime.onMessage.addListener(function(message,sender,sendResponse){})里的sendResponse
-      callback(this.searchResult);
+      if(callback !== undefined)//决定是否回调，即把数据返回显示页面
+        callback(this.searchResult);
 
       //修改外界对象（用于共享数据）
       if(this.$sharedData.searchResult === undefined)
@@ -122,9 +123,11 @@ Network.prototype = {
     };
     // 把内部函数绑定到对象
     filter = filter.bind(this,callback);
-    var url = 'https://c.y.qq.com/v8/fcg-bin/fcg_v8_toplist_cp.fcg?'+
-        'tpl=3&page=detail&date=2017_07&topid=26&type=top&song_begin='+(page - 1) * 6+'&song_num=8&g_tk=5381&'+
-        'loginUin=0&hostUin=0&format=json&inCharset=utf8&outCharset=utf-8&notice=0&platform=yqq&needNewCode=0';
+    var date = new Date();
+    var fullDate = date.getFullYear()+'-'+('0'+(date.getMonth()+1)).slice(-2)+'-'+('0'+(date.getDate()-1)).slice(-2);
+    var url = 'https://c.y.qq.com/v8/fcg-bin/fcg_v8_toplist_cp.fcg'+
+        '?tpl=3&page=detail&date='+fullDate+'&topid=27&type=top&song_begin='+(page-1)*8+'&song_num=8'+
+        '&g_tk=5381&loginUin=0&hostUin=0&format=json&inCharset=utf8&outCharset=utf-8&notice=0&platform=yqq&needNewCode=0';
     this.request(url,'GET',filter);
   }
 }

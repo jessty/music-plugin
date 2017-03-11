@@ -19,11 +19,20 @@
   },
   "background":{
     "scripts":[
-      "js/test.js"
+      "js/player.js",
+      "js/storage.js",
+      "js/network.js",
+      "js/backHandler.js",
+      "js/backHandle.js"
     ]
   },
   "permissions":[
-    "storage"
+    "storage",
+    "http://cc.stream.qqmusic.qq.com/*",
+    "http://base.music.qq.com/*",
+    "https://y.gtimg.cn/*",
+    "http://s.music.qq.com/*",
+    "https://c.y.qq.com/*"
   ]
 
 

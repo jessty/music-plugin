@@ -9,24 +9,25 @@ function Player(sharedData,port){
   this.audio = document.createElement('audio');
 
   //监听播放结束事件 结束自动播放下一首（循环播放）
-  this.audio.onended = function(){
+  this.audio.onended = e =>{
     this.playSong = (this.$playSongIndex+1+this.playList.length)%this.playList.length;
   };
 
   //当歌曲缓冲到可以播放时，再播
-  this.audio.oncanplay = function () {
+  this.audio.oncanplay = e => {
     this.audio.play();
   };
 
   //获取歌曲媒体数据，如时长等
-  this.audio.onloadedmetadata = function () {
+  this.audio.onloadedmetadata = e => {
     console.log(this.audio.duration);
   };
 
   //不断向UI更新进度
-  this.audio.ontimeupdate = function(){
-    port.postMessage({currentTime:this.audio.currentTime/this.audio.duration});
+  this.audio.ontimeupdate = e => {
+    // port.postMessage({currentTime:this.audio.currentTime/this.audio.duration});
   };
+
 
 }
 Player.prototype = {
@@ -46,8 +47,9 @@ Player.prototype = {
     if('songID' in this.playList[index]){
       this.$playWithKey(this.playList[index].songID);
       console.log('play ID');
-    }else{
-      this.audio.src = song.songSrc;
+    }
+    else{
+      this.audio.src = this.playList[index].songSrc;
       this.audio.play();
     }
   },
@@ -126,6 +128,5 @@ Player.prototype = {
   //暂停与否（包含播放）
   set pause(bool){
     bool?this.audio.pause():this.audio.play();
-  },
-
-}
+  }
+};
