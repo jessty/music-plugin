@@ -14,6 +14,7 @@ Network.prototype = {
     request.open(method,url);
     request.onload = function(){
       if(request.status === 200){
+        // console.log(request.responseText);
         filter(request.responseText);
       }else{
         throw new Error('404');
@@ -124,7 +125,11 @@ Network.prototype = {
     // 把内部函数绑定到对象
     filter = filter.bind(this,callback);
     var date = new Date();
-    var fullDate = date.getFullYear()+'-'+('0'+(date.getMonth()+1)).slice(-2)+'-'+('0'+(date.getDate()-1)).slice(-2);
+    var fullDate = '';
+    if(date.getHours()<7)
+      fullDate = date.getFullYear()+'-'+('0'+(date.getMonth()+1)).slice(-2)+'-'+('0'+(date.getDate()-2)).slice(-2);
+    else
+      fullDate = date.getFullYear()+'-'+('0'+(date.getMonth()+1)).slice(-2)+'-'+('0'+(date.getDate()-1)).slice(-2);
     var url = 'https://c.y.qq.com/v8/fcg-bin/fcg_v8_toplist_cp.fcg'+
         '?tpl=3&page=detail&date='+fullDate+'&topid=27&type=top&song_begin='+(page-1)*8+'&song_num=8'+
         '&g_tk=5381&loginUin=0&hostUin=0&format=json&inCharset=utf8&outCharset=utf-8&notice=0&platform=yqq&needNewCode=0';

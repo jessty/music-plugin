@@ -39,7 +39,7 @@ Player.prototype = {
   },
   set playSong(newval){
     this.$playSongIndex = (newval+this.playList.length)%this.playList.length;
-    this.toplay(newval);
+    this.toplay(this.$playSongIndex);
   },
 
   //准备播放（获取播放key、设置src、调用play()播放）
@@ -93,7 +93,7 @@ Player.prototype = {
   //添加歌曲到播放列表
   addToPlay:function (listName,index,callback) {
     if(listName in this.$sharedData && this.$sharedData[listName] instanceof Array){
-      this.playList.splice(this.playSong,0,this.$sharedData[listName][index]);
+      this.playList.splice(this.playSong+1,0,this.$sharedData[listName][index]);
       callback('已添加到播放列表');
     }else{
       new Error('add to playList error');
