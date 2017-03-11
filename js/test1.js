@@ -8,11 +8,11 @@ document.body.onclick = function(){
   if(i==0){
     chrome.runtime.sendMessage({a:'a'},function aa(response) {
       console.log(response);
-      console.log(data);
-      data = response;
-      i++;
+      // console.log(data);
+      // data = response;
+      // i++;
     });
-    console.log(aa);
+    // console.log(aa);
   }else{
     chrome.runtime.sendMessage({a:'a'},function (response) {
       console.log(response);

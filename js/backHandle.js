@@ -2,7 +2,15 @@
  * Created by Y-Star on 2017/2/10.
  */
 var sharedData = {};
-var player = new Player(sharedData);
+
+//用于更新播放进度的通信端口
+var progressPort = chrome.runtime.connect({name:'back'});
+var player = new Player(sharedData,progressPort);
+progressPort.onMessage.addListener(function (msg, port) {
+  if(port.name == 'front')
+    player.setProgress(msg.progress);
+});
+
 var storage = new Storage(sharedData);
 var network = new Network(sharedData);
 //首次尝试初始化排行榜
@@ -12,15 +20,17 @@ try{
   console.log('getTopList error!');
 }
 
-chrome.runtime.onMessage.addListener(receiveHandler);
+chrome.runtime.onMessage.addListener(router);
 
-function receiveHandler(message,sender,sendResponse){
-  switch (message.type)
+function router(message,sender,sendResponse){
+  switch (message.handler)
   {
-    case 's':searchHandler(message.key,message.page,sendResponse);break;//search
-    case 't':getTopListHandler(message.page,sendResponse);break;//get top songs' list
-    case 'c':collectionsHandler(message,sendResponse);break;//get collections
-    case 'pl':
+    case 'search':searchHandler(message.key,message.page,sendResponse);break;//search
+    case 'topList':getTopListHandler(message.page,sendResponse);break;//get top songs' list
+    case 'collect':collectionsHandler(message,sendResponse);break;//get collections
+    case 'playList':playListHandler(message,sendResponse);break;//处理播放列表相关的操作：1.点击歌曲时，选其所在列表作为播放列表
+                                                          //2.添加歌曲为待会播放  3.从播放列表移除歌曲
+    case 'player':playerHandler(message,sendResponse);break;//设置player，如：上下曲，暂停播放，调整音量
   }
   return true;
 }
@@ -89,10 +99,27 @@ function collectionsHandler(message,sendResponse) {
       sendResponse(sharedData.collections);
     }
   }
-
 }
 
-function sendHandler(){
-
+function playListHandler(message,sendResponse){
+  if(message.do == 'play'){
+    player.playOnList(message.list,message.index);
+  }
+  else if(message.do == 'add'){
+    player.addToPlay(message.list,message.index,sendResponse);
+  }
+  else{
+    player.notToPlay(message.index,sendResponse);
+  }
 }
-chrome.runtime.sendMessage()
+function playerHandler(message,sendResponse){
+  switch(message.do)
+  {
+    case 'pause':player.pause = message.bool;break;
+    case 'volumn':player.volume = message.volumn;
+    case 'last':player.playSong--;
+    case 'next':player.playSong++;
+  }
+}
+// chrome.runtime.sendMessage();
+

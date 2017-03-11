@@ -1,15 +1,32 @@
 /**
  * Created by Y-Star on 2017/2/24.
  */
-sharedData、、、
-function Player(){
+
+function Player(sharedData,port){
+  this.$sharedData = sharedData;
+
+  //核心播放器
   this.audio = document.createElement('audio');
+
+  //监听播放结束事件 结束自动播放下一首（循环播放）
   this.audio.onended = function(){
-    this.playSong = (this.$playSongIndex+1)%this.playList.length;
+    this.playSong = (this.$playSongIndex+1+this.playList.length)%this.playList.length;
   };
+
+  //当歌曲缓冲到可以播放时，再播
+  this.audio.oncanplay = function () {
+    this.audio.play();
+  };
+
+  //获取歌曲媒体数据，如时长等
+  this.audio.onloadedmetadata = function () {
+    console.log(this.audio.duration);
+  };
+
+  //不断向UI更新进度
   this.audio.ontimeupdate = function(){
-    send(this.audio.currentTime);
-  }
+    port.postMessage({currentTime:this.audio.currentTime/this.audio.duration});
+  };
 
 }
 Player.prototype = {
@@ -20,9 +37,11 @@ Player.prototype = {
     return this.$playSongIndex;
   },
   set playSong(newval){
-    this.$playSongIndex = newval;
+    this.$playSongIndex = (newval+this.playList.length)%this.playList.length;
     this.toplay(newval);
   },
+
+  //准备播放（获取播放key、设置src、调用play()播放）
   toplay:function (index) {
     if('songID' in this.playList[index]){
       this.$playWithKey(this.playList[index].songID);
@@ -32,6 +51,7 @@ Player.prototype = {
       this.audio.play();
     }
   },
+  //获取播放key
   $playWithKey:function (songID){
     var callback = function (responseData){
       responseData = JSON.parse(responseData);
@@ -56,6 +76,37 @@ Player.prototype = {
     };
     request.send(null);
   },
+
+  //选择歌曲列表作为播放列表，并播放所选歌曲
+  playOnList:function (listName,index) {
+    if(listName in this.$sharedData && this.$sharedData[listName] instanceof Array){
+      this.playList = this.$sharedData[listName].map(function (el) {
+        return el;
+      });
+      this.playSong = index;
+    }else{
+      new Error('playList error');
+    }
+  },
+  //添加歌曲到播放列表
+  addToPlay:function (listName,index,callback) {
+    if(listName in this.$sharedData && this.$sharedData[listName] instanceof Array){
+      this.playList.splice(this.playSong,0,this.$sharedData[listName][index]);
+      callback('已添加到播放列表');
+    }else{
+      new Error('add to playList error');
+    }
+  },
+  //从播放列表删除歌曲
+  notToPlay:function (index,callback) {
+    this.playList.splice(index,1);
+    callback('OK,delete');
+  },
+
+  //进度调整
+  setProgress:function (progress) {
+    this.audio.currentTime = progress*this.audio.duration;
+  },
   // 调整音量
   get volume(){
     return this.audio.volume;
@@ -72,7 +123,7 @@ Player.prototype = {
     }
   },
 
-  //暂停与否
+  //暂停与否（包含播放）
   set pause(bool){
     bool?this.audio.pause():this.audio.play();
   },

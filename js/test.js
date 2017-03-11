@@ -13,10 +13,15 @@ function sendC(sendMessage) {
   console.log('send to c:'+(new Date()).getTime());
   sendMessage('return back to c');
 }
-var data={j:1};
+var datas=[{j:1},{k:2}],datas2 = [{l:3},{m:4}];
 chrome.runtime.onMessage.addListener(function (message,sender,sendMessage) {
-  data.j++;
-  sendMessage(data);
+  var copy = [];
+  copy[0] = datas[0];
+  copy[1] = datas2[0];
+  copy[2] = datas[1];
+  copy[3] = datas2[1];
+  datas2[1] = null;
+  sendMessage(copy,datas2);
   // if('a' in message){
   //   var callbackA = sendA.bind(null,sendMessage);
   //   setTimeout(callbackA,10000);
