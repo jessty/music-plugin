@@ -35,7 +35,7 @@ Network.prototype = {
   search:function (keyword,page,callback){
     this.searchResult = [];
     /////////////////Object Property//////////////////////////////////////
-    var filter = function (callback,responseData){
+    var filter = function (responseData){
       responseData = JSON.parse(responseData);
       var responseList = responseData.data.song.list;
       var details = [];
@@ -79,16 +79,16 @@ Network.prototype = {
       }
     };
     // 把内部函数绑定到对象
-    filter = filter.bind(this,callback);
+    filter = filter.bind(this);
     var url = 'http://s.music.qq.com/fcgi-bin/music_search_new_platform?' +
         't=0&n=8&aggr=1&cr=1&loginUin=0&format=json&inCharset=GB2312&outCharset=utf-8&notice=0&platform=jqminiframe.json&'+
         'needNewCode=0&p='+page+'&catZhida=0&remoteplace=sizer.newclient.next_song&w='+keyword;
     this.request(url,'GET',filter);
   },
-
+// 、、、、、1.图片src处理，不用变为完整的地址；2.getTopList对数据的过滤提取要不要参照search，分成伴奏和非伴奏
   getTopList:function (callback,page){
     this.topList = [];/////////////////Object Property//////////////////////////////////////
-    var filter = function (callback,responseData){
+    var filter = function (responseData){
       responseData = JSON.parse(responseData);
       var songsList = responseData.songlist;
       for(var i=0 ; i<songsList.length ; i++){
@@ -123,10 +123,10 @@ Network.prototype = {
 
     };
     // 把内部函数绑定到对象
-    filter = filter.bind(this,callback);
+    filter = filter.bind(this);
     var date = new Date();
     var fullDate = '';
-    if(date.getHours()<7)
+    if(date.getHours()<10)
       fullDate = date.getFullYear()+'-'+('0'+(date.getMonth()+1)).slice(-2)+'-'+('0'+(date.getDate()-2)).slice(-2);
     else
       fullDate = date.getFullYear()+'-'+('0'+(date.getMonth()+1)).slice(-2)+'-'+('0'+(date.getDate()-1)).slice(-2);

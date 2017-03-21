@@ -7,32 +7,349 @@
 
     <style>
         *{
-            margin:0px;
-            padding:0px;
+          margin:0px;
+          padding:0px;
+          font-family: "Microsoft YaHei";
         }
         body{
-            width:350px;
-            height:500px;
-            background-color:gold;
+          height: 290px;
+          overflow: hidden;
+          transition:height 1s;
         }
-        #content_wrapper{
-            height:100%;
-            overflow-y:auto;
+        section{
+          width:270px;
+          padding:1px;
+        }
+        section:first-child{
+          height:290px;
+          /*overflow: hidden;*/
+          /*position:relative;*/
+          
+        }
+        #background-blur{
+          width:100%;
+          height:600px;
+          position: absolute;
+          z-index: -1;
+          background-size: cover;
+          background-repeat:no-repeat;
+          background-image: url("./pics/test.jpg");
+          background-position: top center;
+          filter:blur(110px);
+        }
+        #pic{
+          width:246px;
+          height:246px;
+          margin: 8px;
+          background-image: url("./pics/test.jpg");
+          background-size:cover;
+          background-origin: border-box;
+          border:4px solid rgba(255,255,255,0.5);
+          border-radius: 50%;
+          /*box-shadow:0px 0px 2px 2px rgba(255,255,255,0.5);*/
+          animation:rotation 10s linear 0s infinite normal;
+        }
+        @keyframes rotation {
+          0% {
+            transform: rotate(0deg);
+          }
+          50% {
+            transform: rotate(180deg);
+          }
+          100% {
+            transform: rotate(360deg);
+          }
+        }
+        #disk{
+          height:20%;
+          width:20%;
+          margin:40%;
+          border:2px solid rgba(255,255,255,0.4);
+          background-color: rgba(255,255,255,0.3);
+          border-radius: 50%;
+        }
+        #disk>div{
+          height: 30%;
+          width: 30%;
+          margin: 35%;
+          background-color: rgba(255, 255, 255, 0.47);
+          border:1px solid rgba(255,255,255,0.5);
+          border-radius: 50%;
+        }
+        #setting{
+          width: 100%;
+          height:100px;
+          position:absolute;
+          top:193px;
+          background-color: rgba(0,0,0,0);
+          transition: top ease-in-out 0.5s,background-color ease-in 0.3s 0.3s;
+        }
+        #setting>p{
+          position: absolute;
+          z-index: 1;
+          margin-top:68px;
+          bottom: 0px;
+        }
+        /*#setting:hover {*/
+          /*!*opacity: 0;*!*/
+          /*background-color: rgba(0, 0, 0, 0.5);*/
+          /*top: 190px;*/
+        /*}*/
+        .songInfo{
+          display: inline-block;
+          font-size:13px;
+          font-weight: 500;
+          color:white;
+          width:100px;
+          margin-right: 10px;
+          padding:6px;
+          text-overflow: ellipsis;
+          white-space:nowrap;
+          overflow: hidden;
+        }
+        /*播放控件*/
+        #controlArea{
+          margin-top:32px;
+          text-align: center;
+          transition:opacity ease-in-out 0.3s 0.3s;
+          opacity:0;
+        }
+        .controls{
+          cursor: pointer;
+          display: inline-block;
+          margin:10px;
+          border-style: solid;
+          border-color:transparent;
+        }
+        /*进度条*/
+        .progressBar{
+          height: 2px;
+          margin:10px 10px;
+          background-color: rgba(0,0,0,0.3);
+        }
+        .progressBar>div{
+          cursor: pointer;
+          position:relative;
+          width: 60%;
+          height: 100%;
+          background-color: white;
+        }
+        .progressBar>div::after{
+          content:'';
+          position:absolute;
+          top:-2px;
+          right:-1px;
+          width: 6px;
+          height:6px;
+          border-radius: 50%;
+          background-color: white;
+        }
 
+
+
+        /*暂停*/
+        .play{
+          border-width: 10px 0px 10px 14px;
+          border-left-color:white;
+        }
+        /*播放*/
+        .pause{
+          width: 4px;
+          height: 20px;
+          border-width: 0px 5px;
+          border-color:transparent white;
+        }
+        /*上下曲按键*/
+        .last,.next{
+          margin-bottom: 13px;
+          position:relative;
+          border-color:transparent white;
+        }
+        .last{
+          border-width: 7px 9px 7px 0px;
+        }
+        .next{
+          border-width: 7px 0px 7px 9px;
+        }
+        .last::before,.next::after{
+          height:14px;
+          position:absolute;
+          content: '.';
+          color:white;
+          background-color: white;
+        }
+        .last::before{
+          top:-7px;
+          left:-2px;
+        }
+        .next::after{
+          top:-7px;
+          right:-2px;
+        }
+        .volumn,.volumn::before,.volumn::after{
+           border-width:10px 21px 10px 0px;
+           border-radius:50%;
+         }
+        .volumn{
+          position:relative;
+          border-right-color:white;
+          margin-right: 2px;
+        }
+
+        .volumn::before,.volumn::after{
+          /*display: block;*/
+          content:'';
+          border-style: solid;
+          border-color: transparent white;
+          position: absolute;
+          top:-10px;
+          left:0px;
+
+        }
+        .volumn::before{
+          border-right-color: rgba(0,0,0,0.4);
+          border-width:10px 18px 10px 0px;
+        }
+        .volumn::after{
+          border-right-width:16px;
+        }
+        .volumnBar{
+          display: inline-block;
+          width: 20%;
+          height: 2px;
+          margin: 19px 10px 19px 0px;
+        }
+
+        .more,.more::before,.more::after{
+          width:5px;
+          border-width:1px;
+          border-color:white;
+          background: rgba(255,255,255,1);
+        }
+        .more{
+          position:relative;
+          height:20px;
+          margin-bottom:12px;
+        }
+        .more::before,.more::after{
+          content:'';
+          position:absolute;
+          bottom:-1px;
+        }
+        .more::before{
+          height:15px;
+          left:-7px;
+        }
+        .more::after{
+          height:10px;
+          right:-7px;
+        }
+        section:last-child{
+          position: relative;
+          z-index:2;
+          height:305px;
+          display:none;
+        }
+        #list{
+          height:265px;
+          overflow-x: hidden;
+          overflow-y: auto;
+        }
+        #list::-webkit-scrollbar{
+          width: 6px;
+        }
+        #list::-webkit-scrollbar-thumb{
+          border-radius:3px;
+          background-color: rgba(255,255,255,1);
+        }
+        #list::-webkit-scrollbar-track{
+          border-radius:3px;
+          background: rgba(68, 68, 68, 0.5);
+        }
+        #list li{
+          border-top:1px solid #9d9d9d;
+          height:50px;
+          margin:1px;
+          transform-origin: top;
+          backface-visibility: hidden;
+          transition:all ease-in-out 0.6s;
+          /*transform:rotateX(180deg);*/
+        }
+        .songName-l,.singer-l{
+          margin:5px 10px 0px 10px;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          overflow:hidden;
+        }
+        .songName-l{
+          color:black;
+          font-size:14px;
+          font-weight: 500;
+        }
+        .singer-l{
+          display:inline-block;
+          width: 50%;
+          color:grey;
+          font-size:12px;
+        }
+
+        #listBottom{
+          padding:1px 0px;
+          border-top: 1px solid #5a5a5a;
+          text-align: center;
         }
     </style>
+
 </head>
-<body >
-<header>
+<body>
+<div id="background-blur"></div>
+<div id="content">
+  <!--唱片部分-->
+  <section>
+      <div id="pic">
+          <div id="disk"><div></div></div>
+      </div>
+      <div style="position:absolute;width: 100%;height:290px;">
+          <div id="setting">
+              <p id="title"><span class="songInfo">告白气球</span><span class="songInfo">周杰伦</span></p>
+              <div id="controlArea">
+                <div class="progressBar">
+                  <div></div>
+                </div>
+                <span class="controls last"></span>
+                <span id="playBt" class="controls play"></span>
+                <span class="controls next"></span>
+                <span class="controls volumn"></span>
+                <div class="progressBar volumnBar">
+                  <div></div>
+                </div>
+                <span class="controls more"></span>
+              </div>
+          </div>
+      </div>
+  </section>
 
-</header>
-<div id="content_wrapper">
-
+  <!--列表部分-->
+  <section>
+      <div><input type="text" id="search"/>search</div>
+      <div>
+        <span id="topList">topList</span>
+        <span id="playList">playList</span>
+        <span id="collect">collect</span>
+      </div>
+      <div id="list">
+        <ul>
+          <li>
+            <p class="songName-l">告白气球</p>
+            <div class="singer-l">周杰伦 / 03:20</div>
+            <div><span class="like"></span><span class="addToplay"></span><span class="delete"></span></div>
+          </li>
+        </ul>
+        <div id="listBottom"></div>
+      </div>
+  </section>
 </div>
-<footer>
-
-</footer>
-
 </body>
-<script src="js/test1.js"></script>
+<script src="js/frontHandler.js"></script>
+<!--<script src="js/test1.js"></script>-->
 </html>

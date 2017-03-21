@@ -33,7 +33,7 @@ Storage.prototype = {
   // 从在chrome.storage中储存的收藏夹中加载所有歌曲
   load:function (callback) {
     this.collections = [];
-    var objToArray = function (callback,obj) {
+    var objToArray = function (obj) {
       for(var item in obj){
         this.collections.push(obj[item]);
       }
@@ -41,7 +41,7 @@ Storage.prototype = {
         callback(this.collections);
       this.$sharedData.collections = this.collections;
     };
-    objToArray = objToArray.bind(this,callback);
+    objToArray = objToArray.bind(this);
     chrome.storage.local.get(null,objToArray);
   }
 }

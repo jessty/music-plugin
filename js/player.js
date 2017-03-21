@@ -82,6 +82,8 @@ Player.prototype = {
   //选择歌曲列表作为播放列表，并播放所选歌曲
   playOnList:function (listName,index) {
     if(listName in this.$sharedData && this.$sharedData[listName] instanceof Array){
+      // 、、playList在sharedData变化时，要不要也变化，如果要变化，如何实现同步
+      //选同一个列表另一首歌时，下面的本不需再做，playList不用再重新赋值更新
       this.playList = this.$sharedData[listName].map(function (el) {
         return el;
       });
@@ -104,7 +106,13 @@ Player.prototype = {
     this.playList.splice(index,1);
     callback('OK,delete');
   },
-
+  //获取播放列表
+  getPlayList:function(callback){
+    if(this.playList.length === 0){
+      callback('There isn\'t a song to be played');
+    }
+    else callback(this.playList);
+  },
   //进度调整
   setProgress:function (progress) {
     this.audio.currentTime = progress*this.audio.duration;

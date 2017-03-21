@@ -18,6 +18,7 @@
     "default_popup": "popup.html"
   },
   "background":{
+//    "persistent":false,
     "scripts":[
       "js/player.js",
       "js/storage.js",
@@ -25,6 +26,7 @@
       "js/backHandler.js",
       "js/backHandle.js"
     ]
+
   },
   "permissions":[
     "storage",

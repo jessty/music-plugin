@@ -15,19 +15,22 @@ BackHandler.prototype = {
       if(port.name == 'front')
         this.player.setProgress(msg.progress);
     });
-    chrome.runtime.onMessage.addListener(this.router);
+    console.log(this);
+    var router = this.router.bind(this);
+    chrome.runtime.onMessage.addListener(router);
   },
 
   //通信转发路由
   router:function(message,sender,sendResponse){
+    console.log(this);
     switch (message.handler)
     {
-      case 'search':this.searchHandler(message.key,message.page,sendResponse);break;//search
-      case 'topList':this.getTopListHandler(message.page,sendResponse);break;//get top songs' list
-      case 'collect':this.collectionsHandler(message,sendResponse);break;//get collections
-      case 'playList':this.playListHandler(message,sendResponse);break;//处理播放列表相关的操作：1.点击歌曲时，选其所在列表作为播放列表
-        //2.添加歌曲为待会播放  3.从播放列表移除歌曲
-      case 'player':this.playerHandler(message,sendResponse);break;//设置player，如：上下曲，暂停播放，调整音量
+      case 'search':this.searchHandler(message.key,message.page,sendResponse); console.log('search connect');break;//search
+      case 'topList':this.getTopListHandler(message,sendResponse);console.log('topList connect');break;//get top songs' list
+      case 'collect':this.collectionsHandler(message,sendResponse);console.log('collect connect');break;//get collections
+      case 'playList':this.playListHandler(message,sendResponse);console.log('playList connect');break;//处理播放列表相关的操作：1.点击歌曲时，选其所在列表作为播放列表
+        //2.添加歌曲为待会播放  3.从播放列表移除歌曲  4.获取播放列表
+      case 'player':this.playerHandler(message,sendResponse);console.log('player connect');break;//设置player，如：上下曲，暂停播放，调整音量
     }
     return true;
   },
@@ -49,15 +52,15 @@ BackHandler.prototype = {
   },
 
   //排行榜处理器，主要进行异常处理和过滤
-  getTopListHandler:function (page,sendResponse) {
+  getTopListHandler:function (msg,sendResponse) {
     try {
       if (this.sharedData.topList === undefined || this.sharedData.topList.length === 0) {//没有topLsit数据，尝试获取
         this.network.getTopList(sendResponse, 1);
       }
-      else if(page == 1){                                            //有topList数据，若只要第一页，则把已缓存的数据直接返回
+      else if(msg.page == 1){                                            //有topList数据，若只要第一页，则把已缓存的数据直接返回
         sendResponse(this.sharedData.topList);
       }else{
-        this.network.getTopList(sendResponse, page);                      //有topList数据，若要其他页，尝试获取
+        this.network.getTopList(sendResponse, msg.page);                      //有topList数据，若要其他页，尝试获取
       }
     }catch (e){
       switch(e.message)
@@ -80,14 +83,13 @@ BackHandler.prototype = {
       return;
     }
 
-    var responseFilter = function(sendResponse,result){
+    var responseFilter = function(result){
       if(result.length == 0){                                        //加载收藏夹时，对结果进行筛选
         sendResponse('收藏夹空空的，正饥渴地望着你~~');
       }else{
         sendResponse(result);
       }
     };
-    responseFilter = responseFilter.bind(null,sendResponse);
     if(message.do === 'load'){
       if(this.sharedData.collections === undefined){
         this.storage.load(responseFilter);
@@ -103,14 +105,12 @@ BackHandler.prototype = {
 
   //专门用于操作播放列表
   playListHandler:function (message,sendResponse){
-    if(message.do == 'play'){
-      this.player.playOnList(message.list,message.index);
-    }
-    else if(message.do == 'add'){
-      this.player.addToPlay(message.list,message.index,sendResponse);
-    }
-    else{
-      this.player.notToPlay(message.index,sendResponse);
+    switch(message.do)
+    {
+      case 'play':this.player.playOnList(message.list,message.index);break;
+      case 'add':this.player.addToPlay(message.list,message.index,sendResponse);break;
+      case 'delete':this.player.notToPlay(message.index,sendResponse);break;
+      case 'load':this.player.getPlayList(sendResponse);break;
     }
   },
 
