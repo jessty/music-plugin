@@ -11,10 +11,9 @@
           padding:0px;
           font-family: "Microsoft YaHei";
         }
-        body{
+        #content{
           height: 290px;
           overflow: hidden;
-          transition:height 1s;
         }
         section{
           width:270px;
@@ -22,8 +21,8 @@
         }
         section:first-child{
           height:290px;
-          /*overflow: hidden;*/
-          /*position:relative;*/
+          overflow: hidden;
+          /*position:absolute;*/
           
         }
         #background-blur{
@@ -47,7 +46,7 @@
           border:4px solid rgba(255,255,255,0.5);
           border-radius: 50%;
           /*box-shadow:0px 0px 2px 2px rgba(255,255,255,0.5);*/
-          animation:rotation 10s linear 0s infinite normal;
+          animation:rotation 20s linear 0s infinite normal;
         }
         @keyframes rotation {
           0% {
@@ -78,57 +77,70 @@
         }
         #setting{
           width: 100%;
-          height:100px;
+          height:90px;
           position:absolute;
-          top:193px;
+          top:202px;
           background-color: rgba(0,0,0,0);
-          transition: top ease-in-out 0.5s,background-color ease-in 0.3s 0.3s;
+          transition: top ease-in-out 0.5s,background-color ease-in 0.3s 0.2s;
         }
-        #setting>p{
-          position: absolute;
-          z-index: 1;
-          margin-top:68px;
-          bottom: 0px;
+        .cover{
+          position:absolute;
+          width: 100%;
+          height:90px;
+          bottom: -3px;
+          z-index:1;
+          transition:bottom ease-in-out 0.5s;
         }
-        /*#setting:hover {*/
-          /*!*opacity: 0;*!*/
-          /*background-color: rgba(0, 0, 0, 0.5);*/
-          /*top: 190px;*/
-        /*}*/
+        .cover>div{
+          height:58px;
+        }
+        #title{
+          text-align: center;
+        }
         .songInfo{
           display: inline-block;
           font-size:13px;
           font-weight: 500;
           color:white;
           width:100px;
-          margin-right: 10px;
           padding:6px;
           text-overflow: ellipsis;
           white-space:nowrap;
           overflow: hidden;
         }
+        .songInfo:first-child{
+          margin-right: 20px;
+          text-align: right;
+        }
+        .songInfo:last-child{
+          margin-left: 20px;
+          text-align: left;
+        }
         /*播放控件*/
         #controlArea{
-          margin-top:32px;
+          margin-top:37px;
           text-align: center;
-          transition:opacity ease-in-out 0.3s 0.3s;
+          transition:opacity ease-in-out 0.3s 0.2s;
           opacity:0;
         }
         .controls{
+          margin:10px;
+          cursor: pointer;
+        }
+        .icons{
           cursor: pointer;
           display: inline-block;
-          margin:10px;
+          /*margin:10px;*/
           border-style: solid;
           border-color:transparent;
         }
         /*进度条*/
         .progressBar{
           height: 2px;
-          margin:10px 10px;
+          margin-bottom:3px;
           background-color: rgba(0,0,0,0.3);
         }
         .progressBar>div{
-          cursor: pointer;
           position:relative;
           width: 60%;
           height: 100%;
@@ -147,12 +159,12 @@
 
 
 
-        /*暂停*/
+        /*播放*/
         .play{
           border-width: 10px 0px 10px 14px;
           border-left-color:white;
         }
-        /*播放*/
+        /*暂停*/
         .pause{
           width: 4px;
           height: 20px;
@@ -220,36 +232,123 @@
           margin: 19px 10px 19px 0px;
         }
 
-        .more,.more::before,.more::after{
+        .topList,.topList::before,.topList::after{
           width:5px;
           border-width:1px;
           border-color:white;
           background: rgba(255,255,255,1);
         }
-        .more{
+        .topList{
           position:relative;
           height:20px;
           margin-bottom:12px;
         }
-        .more::before,.more::after{
+        .topList::before,.topList::after{
           content:'';
           position:absolute;
           bottom:-1px;
         }
-        .more::before{
+        .topList::before{
           height:15px;
           left:-7px;
         }
-        .more::after{
+        .topList::after{
           height:10px;
           right:-7px;
         }
         section:last-child{
-          position: relative;
-          z-index:2;
           height:305px;
-          display:none;
+          opacity: 0;
+          transition: opacity ease 0.5s;
         }
+        /*各种功能的图标*/
+        .search{
+          position: relative;
+          width:16px;
+          height:16px;
+          border:2px solid white;
+          border-radius:50%;
+        }
+        .search::after{
+          content:'';
+          position:absolute;
+          display: inline-block;
+          width:6px;
+          height:3px;
+          background-color: white;
+          transform:rotateZ(45deg);
+          bottom:-3px;
+          right:-4px;
+        }
+        .playList{
+          position:relative;
+          width:19px;
+          height:19px;
+          border:2px solid white;
+          border-radius:50%;
+        }
+        .playList::before,.playList::after{
+          content:'';
+          position:absolute;
+          height:2px;
+          background-color: white;
+          transform-origin: left;
+          top:9px;
+          left:9px;
+        }
+        .playList:before{
+          width:8px;
+          transform:rotateZ(-90deg);
+        }
+        .playList::after{
+          width:5px;
+          transform:rotateZ(35deg);
+        }
+        .collect{
+          position:relative;
+          width:13px;
+          height:13px;
+          border-width:0px;
+          background-color:white;
+          transform:rotateZ(45deg);
+        }
+        .collect::before,.collect::after{
+          content:'';
+          position:absolute;
+          display: inline-block;
+          width:100%;
+          height:100%;
+          border: inherit;
+          background-color: inherit;
+          border-radius: 50%;
+        }
+        .collect::before{
+          left:-50%;
+        }
+        .collect::after{
+          top:-50%;
+        }
+        /*.collect{*/
+          /*position:relative;*/
+          /*border-color:white;*/
+          /*border-width:6px;*/
+          /*transform: rotateZ(45deg);*/
+        /*}*/
+        /*.collect::before,.collect::after{*/
+          /*position:absolute;*/
+          /*content:'';*/
+          /*border:6px solid white;*/
+          /*border-radius:50%;*/
+        /*}*/
+        /*.collect::before{*/
+          /*top:-6px;*/
+          /*left:-14px;*/
+        /*}*/
+        /*.collect::after{*/
+          /*top:-14px;*/
+          /*left:-6px;*/
+        /*}*/
+        /*歌曲列表*/
         #list{
           height:265px;
           overflow-x: hidden;
@@ -266,6 +365,7 @@
           border-radius:3px;
           background: rgba(68, 68, 68, 0.5);
         }
+        /*单个歌曲列表项*/
         #list li{
           border-top:1px solid #9d9d9d;
           height:50px;
@@ -292,7 +392,7 @@
           color:grey;
           font-size:12px;
         }
-
+        /*列表底部的结束线*/
         #listBottom{
           padding:1px 0px;
           border-top: 1px solid #5a5a5a;
@@ -309,33 +409,30 @@
       <div id="pic">
           <div id="disk"><div></div></div>
       </div>
-      <div style="position:absolute;width: 100%;height:290px;">
-          <div id="setting">
-              <p id="title"><span class="songInfo">告白气球</span><span class="songInfo">周杰伦</span></p>
-              <div id="controlArea">
-                <div class="progressBar">
-                  <div></div>
-                </div>
-                <span class="controls last"></span>
-                <span id="playBt" class="controls play"></span>
-                <span class="controls next"></span>
-                <span class="controls volumn"></span>
-                <div class="progressBar volumnBar">
-                  <div></div>
-                </div>
-                <span class="controls more"></span>
-              </div>
+      <div id="setting">
+          <div class="cover">
+            <div ></div>
+            <p id="title"><span class="songInfo">告白气球</span><span class="songInfo">周杰伦</span></p>
+          </div>
+          <div id="controlArea">
+              <div class="controls progressBar"><div></div></div>
+              <span class="controls icons last"></span>
+              <span id="playBt" class="controls icons play"></span>
+              <span class="controls icons next"></span>
+              <span class="controls icons volumn"></span>
+              <div class="controls progressBar volumnBar"><div></div></div>
+              <span class="controls icons topList"></span>
           </div>
       </div>
   </section>
 
   <!--列表部分-->
   <section>
-      <div><input type="text" id="search"/>search</div>
       <div>
-        <span id="topList">topList</span>
-        <span id="playList">playList</span>
-        <span id="collect">collect</span>
+        <span id="topList" class="icons topList"></span>
+        <input type="text" id="search"/><span class="icons search"></span>
+        <span id="playList" class="icons playList"></span>
+        <span id="collect" class="icons collect"></span>
       </div>
       <div id="list">
         <ul>

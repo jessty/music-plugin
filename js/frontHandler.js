@@ -171,16 +171,30 @@ document.getElementById('collect').onclick = function () {
 document.getElementById('title').addEventListener('mouseover',function (e) {
   document.getElementById('setting').style.backgroundColor = 'rgba(0,0,0,0.4)';
   // e.currentTarget.style.top = '193px';
-  e.currentTarget.style.bottom = '68px';
+  e.currentTarget.parentNode.style.bottom = '58px';
   document.getElementById('controlArea').style.opacity = '1';
 });
-document.getElementById('title').addEventListener('mouseout',function (e) {
+document.getElementById('setting').addEventListener('mouseleave',function (e) {
   document.getElementById('setting').style.backgroundColor = 'rgba(0,0,0,0)';
   // e.currentTarget.style.top = '263px';
-  e.currentTarget.style.bottom = '0px';
+  e.currentTarget.querySelector('.cover').style.bottom = '-3px';
   document.getElementById('controlArea').style.opacity = '0';
 });
-document.querySelector('.more').addEventListener('click',function () {
+document.querySelector('.topList').addEventListener('click',function () {
+  // document.querySelectorAll('section')[1].style.display = 'block';
+  document.querySelectorAll('section')[1].style.opacity = '1';
+  document.getElementById('content').style.height = '600px';
+});
+document.querySelector('.play').addEventListener('click',function (e) {
+  var classes = e.target.classList;
+  var el = e.target;
+  // el.style.transition = 'border-right-width ease 0.3s';
+  if(classes.contains('play')){
+    classes.remove('play');
+    classes.add('pause');
+  }else{
+    classes.remove('pause');
+    classes.add('play');
+  }
 
-  document.querySelectorAll('section')[1].style.display = block;
 })
