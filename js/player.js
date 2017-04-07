@@ -2,15 +2,14 @@
  * Created by Y-Star on 2017/2/24.
  */
 
-function Player(sharedData,port){
+function Player(sharedData){
   this.$sharedData = sharedData;
 
   //核心播放器
   this.audio = document.createElement('audio');
-
   //监听播放结束事件 结束自动播放下一首（循环播放）
   this.audio.onended = e =>{
-    this.playSong = (this.$playSongIndex+1+this.playList.length)%this.playList.length;
+    this.playSongIndex = (this.$playSongIndex+1+this.playList.length)%this.playList.length;
   };
 
   //当歌曲缓冲到可以播放时，再播
@@ -25,33 +24,99 @@ function Player(sharedData,port){
 
   //不断向UI更新进度
   this.audio.ontimeupdate = e => {
-    // port.postMessage({currentTime:this.audio.currentTime/this.audio.duration});
+    try{
+      chrome.runtime.sendMessage({
+          type:'changeTime',
+          currentTime:this.audio.currentTime,
+          progress:this.progress//有null出现！！！！！！！！！！！！
+        },function (response) {
+          console.log(response);
+      });
+    }catch(e){
+      //do nothing
+    }
   };
 
 
 }
 Player.prototype = {
-  playList:[],
+  playingSong:{
+    album:' ',
+    songPic:'./pics/notPlay.jpg',
+    songID:' ',
+    time:0,
+    song:'~~',
+    singer:'~~'
+  },
+  errorSong:{
+    album:' ',
+    songPic:'./pics/errorSong.jpg',
+    songID:' ',
+    time:0,
+    song:'~~',
+    singer:'~~'
+  },
   $playSongIndex:undefined,
+  playList:[],
+
   //设置播放的歌曲Index，可用于上一首下一首切歌
-  get playSong(){
+  get playSongIndex(){
     return this.$playSongIndex;
   },
-  set playSong(newval){
+  set playSongIndex(newval){
     this.$playSongIndex = (newval+this.playList.length)%this.playList.length;
-    this.toplay(this.$playSongIndex);
+    try{
+      this.toplay(this.$playSongIndex);
+      this.playingSong = this.playList[this.$playSongIndex];
+      try{
+        chrome.runtime.sendMessage({
+            type:'changeSong',
+            song:this.playingSong,
+            progress:0,
+            volume:this.volume,
+            paused:false
+          },function (response) {
+            console.log(response);
+        });
+      }catch(e){
+        //do nothing
+      }
+    }
+    catch(e){//还要修改图标？？？？
+      this.playingSong = this.errorSong;
+      try{
+        chrome.runtime.sendMessage({
+            type:'changeSong',
+            song:this.errorSong,
+            progress:0,
+            volume:this.volume,
+            paused:true
+          },function (response) {
+            console.log(response);
+        });
+      }catch(e){
+        //do nothing
+      }
+    }
   },
 
   //准备播放（获取播放key、设置src、调用play()播放）
   toplay:function (index) {
-    if('songID' in this.playList[index]){
-      this.$playWithKey(this.playList[index].songID);
-      console.log('play ID');
+    if(this.$sharedData.online == true){
+      console.log('to  play');
+      if('songID' in this.playList[index]){
+        this.$playWithKey(this.playList[index].songID);
+        console.log('play ID');
+      }
+      else{
+        this.audio.src = this.playList[index].songSrc;
+        this.audio.play();
+      }
     }
     else{
-      this.audio.src = this.playList[index].songSrc;
-      this.audio.play();
+      throw new Error("toplay error");
     }
+
   },
   //获取播放key
   $playWithKey:function (songID){
@@ -70,11 +135,16 @@ Player.prototype = {
       if(request.status === 200){
         callback(request.responseText);
       }else{
-        throw new Error('404');
+        // throw new Error('player.$playWithKey:net Error');
       }
     };
-    request.ontimeout = function(){
-      throw new Error('timeout');
+    request.ontimeout = e => {
+      this.$sharedData.online = false;
+      // throw new Error('player.$playWithKey:net Error');
+    };
+    request.onerror = e => {
+      this.$sharedData.online = false;
+      // throw new Error('player.$playWithKey:net Error');
     };
     request.send(null);
   },
@@ -87,7 +157,7 @@ Player.prototype = {
       this.playList = this.$sharedData[listName].map(function (el) {
         return el;
       });
-      this.playSong = index;
+      this.playSongIndex = index;
     }else{
       new Error('playList error');
     }
@@ -95,7 +165,8 @@ Player.prototype = {
   //添加歌曲到播放列表
   addToPlay:function (listName,index,callback) {
     if(listName in this.$sharedData && this.$sharedData[listName] instanceof Array){
-      this.playList.splice(this.playSong+1,0,this.$sharedData[listName][index]);
+      //this.playSongIndex 初始值是？？当列表为空时添加歌曲有问题
+      this.playList.splice(this.playSongIndex+1,0,this.$sharedData[listName][index]);
       callback('已添加到播放列表');
     }else{
       new Error('add to playList error');
@@ -114,7 +185,10 @@ Player.prototype = {
     else callback(this.playList);
   },
   //进度调整
-  setProgress:function (progress) {
+  get progress(){
+    return this.audio.currentTime/this.audio.duration;
+  },
+  set progress(progress) {
     this.audio.currentTime = progress*this.audio.duration;
   },
   // 调整音量
@@ -126,15 +200,18 @@ Player.prototype = {
       this.audio.muted = true;
     else if(this.audio.muted == true){
       this.audio.muted = false;
-      this.audio.volume = newValue/10;
+      this.audio.volume = newValue;
     }
     else{
-      this.audio.volume = newValue/10;
+      this.audio.volume = newValue;
     }
   },
 
   //暂停与否（包含播放）
-  set pause(bool){
+  get paused(){
+    return this.audio.paused;
+  },
+  set paused(bool){
     bool?this.audio.pause():this.audio.play();
   }
 };

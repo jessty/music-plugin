@@ -4,10 +4,37 @@
 function Network(sharedData){
   //获取外界对象，以获得对它的操作权
   this.$sharedData = sharedData;
+  console.log(typeof this.testOnline)
+  var that = this;
+  function testOnline(){
+      var xhr = new  XMLHttpRequest();
+      xhr.open('HEAD','https://www.baidu.com/');
+      function getStatus(bol,abc){
+        this.$sharedData.online = bol;
+      }
+      xhr.onload = getStatus.bind(that,true);
+      xhr.onerror = getStatus.bind(that,false);
+      xhr.ontimeout = getStatus.bind(that,false);
+      xhr.send(null);
+      setTimeout(testOnline,30000);
+  }
+  setTimeout(testOnline,0);
 }
 Network.prototype = {
   searchResult:[],
   topList:[],
+  // testOnline:function(){
+  //   var xhr = new  XMLHttpRequest();
+  //   xhr.open('HEAD','https://www.baidu.com/');
+  //   function getStatus(bol,abc){
+  //     this.$sharedData.online = bol;
+  //   }
+  //   xhr.onload = getStatus.bind(this,true);
+  //   xhr.onerror = getStatus.bind(this,false);
+  //   xhr.ontimeout = getStatus.bind(this,false);
+  //   xhr.send(null);
+  //   setTimeout(this.testOnline,30000);
+  // },
   //在该插件，method只有GET，data是没有用处的，下面的函数是为了可拓展性，万一以后拓展插件需要POST呢！？
   request:function (url,method,filter,data){
     var request = new XMLHttpRequest();
@@ -25,7 +52,7 @@ Network.prototype = {
     };
     request.onerror = function () {
       throw new Error('error');
-    }
+    };
     if(data===undefined)
       request.send(null);
     else
@@ -58,7 +85,7 @@ Network.prototype = {
           song.album = (details[5]=='空')?'':details[5];
           song.time = parseInt(details[7]);
           song.songID = details[20];
-          song.songPic = 'https://y.gtimg.cn/music/photo_new/T002R90x90M000' + details[22] + '.jpg?max_age=2592000';
+          song.songPic = details[22];
         }
         this.searchResult.push(song);/////////////////Object Property//////////////////////////////////////
       }
@@ -95,7 +122,7 @@ Network.prototype = {
         var song = {};
         var eachSong = songsList[i].data;
         song.album = eachSong.albumname;
-        song.songPic = 'https://y.gtimg.cn/music/photo_new/T002R90x90M000' + eachSong.albummid + '.jpg?max_age=2592000';
+        song.songPic = eachSong.albummid;
         song.songID = eachSong.strMediaMid;
         song.time = eachSong.interval;
         song.song = eachSong.songname;
@@ -124,14 +151,12 @@ Network.prototype = {
     };
     // 把内部函数绑定到对象
     filter = filter.bind(this);
-    var date = new Date();
-    var fullDate = '';
-    if(date.getHours()<10)
-      fullDate = date.getFullYear()+'-'+('0'+(date.getMonth()+1)).slice(-2)+'-'+('0'+(date.getDate()-2)).slice(-2);
-    else
-      fullDate = date.getFullYear()+'-'+('0'+(date.getMonth()+1)).slice(-2)+'-'+('0'+(date.getDate()-1)).slice(-2);
-    var url = 'https://c.y.qq.com/v8/fcg-bin/fcg_v8_toplist_cp.fcg'+
-        '?tpl=3&page=detail&date='+fullDate+'&topid=27&type=top&song_begin='+(page-1)*8+'&song_num=8'+
+    //由于qq音乐是早上10点左右把榜单更新为前一天的排行结果，所以要减去24+24+10h（2.088e8ms）
+    var date = new Date(Date.now()-2.088e8);
+    var fullDate = date.getFullYear()+'-'+('0'+(date.getMonth()+1)).slice(-2)+'-'+('0'+date.getDate()).slice(-2);
+    console.log('fullDate  '+fullDate);
+    var url = 'https://c.y.qq.com/v8/fcg-bin/fcg_v8_toplist_cp.fcg' +
+        '?tpl=3&page=detail&date=' + fullDate + '&topid=4&type=top&song_begin=' + (page - 1) * 8 + '&song_num=8' +
         '&g_tk=5381&loginUin=0&hostUin=0&format=json&inCharset=utf8&outCharset=utf-8&notice=0&platform=yqq&needNewCode=0';
     this.request(url,'GET',filter);
   }

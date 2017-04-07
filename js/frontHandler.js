@@ -5,18 +5,72 @@ var FrontHandlerClass = (function(){
   function FrontHandler(args) {
     //私有变量
     var $type = '';
+    var $page = 0;
     var $showData = [];
     var $list = document.getElementById('list').querySelector('ul');
     var liCopy = $list.querySelector('li').cloneNode(true);
     var $fragCache = document.createDocumentFragment();
     function request(message,callback) {
-      console.log('request');
+      console.log('front request');
       chrome.runtime.sendMessage(message,function (response) {
         callback(response);
       });
     }
-    //共有变量和方法
+    function listen(){
+      chrome.runtime.onMessage.addListener(function (msg,sender,sendMessage) {
+        if(msg.type=='changeTime'||msg.type=='changeSong'){
+          refleshUI(msg);
+        }
+        return true;
+      });
+    }
+    //私有方法，刷新UI界面
+    var refleshUI = (function() {
+      //缓存dom对象
+      var bground = document.getElementById('background-blur');
+      var pic = document.getElementById('pic');
+      var titles = document.getElementById('title').querySelectorAll('span');
+      var controlArea = document.getElementById('controlArea');
+      var progressBar = controlArea.querySelector('.progressBar>div');
+      var playBt = controlArea.querySelector('.playBt');
+      var volumeBar = controlArea.querySelector('.volumeBar>div');
+      //返回实际刷新UI界面方法
+      return function (response) {
+        if (response.type == 'createUI' || response.type == 'changeSong') {
+          var picUrl = '';
+          if(response.song.songPic[0] == '.'){
+            picUrl = 'url('+response.song.songPic+')';
+          }
+          else
+            picUrl = 'url(https://y.gtimg.cn/music/photo_new/T002R300x300M000' + response.song.songPic + '.jpg?max_age=2592000)';
+          bground.style.backgroundImage = picUrl;
+          pic.style.backgroundImage = picUrl;
+          pic.style.animation = 'rotation ' + response.song.time / 2 + 's linear 0s infinite normal';
+          titles[0].innerText = response.song.song;
+          titles[1].innerText = response.song.singer;
+          progressBar.style.width = response.progress * 100 + '%';
+          volumeBar.style.width = response.volume * 100 + '%';
+          if (!response.paused) {
+            playBt.classList.remove('toPlay');
+            playBt.classList.add('toPause');
+          } else {
+            playBt.classList.remove('toPause');
+            playBt.classList.add('toPlay');
+          }
+        } else if (response.type == 'changeTime') {
+          if(progressBar.dataset.modifiable == 'true'){
+            progressBar.style.width = response.progress * 100 + '%';
+            var curTime = Math.round(response.currentTime);
+            progressBar.querySelector('span').title = Math.floor(curTime/60) + ':' + curTime % 60 + ' / ';
+          }
+        }
+      }
+    })();
+    //公有变量和方法
     return {
+      publicRequest:request,
+      publicListen:listen,
+
       get showType(){
         return $type;
       },
@@ -27,9 +81,10 @@ var FrontHandlerClass = (function(){
           $list.style.display = 'none';
           $type = newType;
           $showData = [];
-          this.loadSongs(1);
+          $page = 1;
+          this.loadSongs($page);
         }else{
-          document.getElementBy.scrollTop = 0;//返回顶部
+          //document.getElementById('list').scrollTop = 0;//返回顶部
         }
       },
       get showData(){
@@ -139,10 +194,19 @@ var FrontHandlerClass = (function(){
           document.getElementById('listBottom').innerText = 'no more songs!';
         }
         $list.style.display = 'block';
+      },
+      //控制上下曲与暂停播放
+      lastNextOrPause:function (choice,bool) {
+        request({handler:'player',do:choice,value:bool},console.log);
+      },
+      modifyBar:function (choice,value) {
+        request({handler:'player',do:choice,value:value},console.log)
+      },
+      //初始化UI界面
+      initializeUI:function(){
+        request({handler:'createUI'},refleshUI);
       }
     };
-
-
   }
   //实例容器
   var instance = undefined;
@@ -155,46 +219,5 @@ var FrontHandlerClass = (function(){
     }
   }
 })();
-var frontHandler = FrontHandlerClass.getInstance();
-document.getElementById('topList').onclick = function () {
-  frontHandler.showType = 'topList';
-  console.log('topList Click');
-};
-document.getElementById('playList').onclick = function () {
-  frontHandler.showType = 'playList';
-  console.log('playList Click');
-};
-document.getElementById('collect').onclick = function () {
-  frontHandler.showType = 'collect';
-  console.log('collect Click');
-};
-document.getElementById('title').addEventListener('mouseover',function (e) {
-  document.getElementById('setting').style.backgroundColor = 'rgba(0,0,0,0.4)';
-  // e.currentTarget.style.top = '193px';
-  e.currentTarget.parentNode.style.bottom = '58px';
-  document.getElementById('controlArea').style.opacity = '1';
-});
-document.getElementById('setting').addEventListener('mouseleave',function (e) {
-  document.getElementById('setting').style.backgroundColor = 'rgba(0,0,0,0)';
-  // e.currentTarget.style.top = '263px';
-  e.currentTarget.querySelector('.cover').style.bottom = '-3px';
-  document.getElementById('controlArea').style.opacity = '0';
-});
-document.querySelector('.topList').addEventListener('click',function () {
-  // document.querySelectorAll('section')[1].style.display = 'block';
-  document.querySelectorAll('section')[1].style.opacity = '1';
-  document.getElementById('content').style.height = '600px';
-});
-document.querySelector('.play').addEventListener('click',function (e) {
-  var classes = e.target.classList;
-  var el = e.target;
-  // el.style.transition = 'border-right-width ease 0.3s';
-  if(classes.contains('play')){
-    classes.remove('play');
-    classes.add('pause');
-  }else{
-    classes.remove('pause');
-    classes.add('play');
-  }
 
-})
+

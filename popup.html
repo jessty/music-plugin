@@ -34,7 +34,8 @@
           background-repeat:no-repeat;
           background-image: url("./pics/test.jpg");
           background-position: top center;
-          filter:blur(110px);
+          filter:blur(70px);
+          transition: background-image ease-in-out 0.3s;
         }
         #pic{
           width:246px;
@@ -43,20 +44,23 @@
           background-image: url("./pics/test.jpg");
           background-size:cover;
           background-origin: border-box;
-          border:4px solid rgba(255,255,255,0.5);
+          border:3px solid rgba(255,255,255,0.5);
           border-radius: 50%;
           /*box-shadow:0px 0px 2px 2px rgba(255,255,255,0.5);*/
-          animation:rotation 20s linear 0s infinite normal;
+          /*animation:rotation 20s linear 0s infinite normal;*/
+          /*启动硬件加速*/
+          transform: translateZ(0);
+          transition: background-image ease-in-out 0.3s;
         }
         @keyframes rotation {
           0% {
-            transform: rotate(0deg);
+            transform: rotateZ(0deg);
           }
           50% {
-            transform: rotate(180deg);
+            transform: rotateZ(180deg);
           }
           100% {
-            transform: rotate(360deg);
+            transform: rotateZ(360deg);
           }
         }
         #disk{
@@ -77,25 +81,26 @@
         }
         #setting{
           width: 100%;
-          height:90px;
+          height:60px;
           position:absolute;
-          top:202px;
+          top:232px;
           background-color: rgba(0,0,0,0);
-          transition: top ease-in-out 0.5s,background-color ease-in 0.3s 0.2s;
+          transition:background-color ease-in 0.3s 0.3s;
         }
         .cover{
           position:absolute;
           width: 100%;
-          height:90px;
-          bottom: -3px;
+          height:58px;
+          bottom: 4px;
           z-index:1;
           transition:bottom ease-in-out 0.5s;
         }
         .cover>div{
-          height:58px;
+          height:26px;
         }
         #title{
           text-align: center;
+          background-color: rgba(0,0,0,0.4);
         }
         .songInfo{
           display: inline-block;
@@ -118,54 +123,61 @@
         }
         /*播放控件*/
         #controlArea{
-          margin-top:37px;
           text-align: center;
-          transition:opacity ease-in-out 0.3s 0.2s;
+          transition:opacity ease-in-out 0.3s 0.3s;
           opacity:0;
         }
         .controls{
           margin:10px;
-          cursor: pointer;
         }
         .icons{
           cursor: pointer;
           display: inline-block;
-          /*margin:10px;*/
+          position:relative;
           border-style: solid;
           border-color:transparent;
         }
+        .icons::before,.icons::after{
+          position:absolute;
+        }
         /*进度条*/
         .progressBar{
+          cursor: pointer;
+          width:252px;
           height: 2px;
-          margin-bottom:3px;
+          border-width:2px 0px;
+          border-style:solid;
+          border-color:transparent;
+          margin-bottom:0px;
           background-color: rgba(0,0,0,0.3);
+          background-clip:content-box;
         }
         .progressBar>div{
-          position:relative;
+          cursor: pointer;
           width: 60%;
-          height: 100%;
+          height: inherit;
           background-color: white;
         }
-        .progressBar>div::after{
-          content:'';
-          position:absolute;
-          top:-2px;
-          right:-1px;
+        .barEnd{
+          cursor: inherit;
+          display:block;
           width: 6px;
-          height:6px;
+          height: 300%;
+          border:2px solid transparent;
+          margin-left: 100%;
           border-radius: 50%;
-          background-color: white;
+          transform: translate(-50%,-47%);
+          background-color: inherit;
+          background-clip: content-box;
         }
-
-
 
         /*播放*/
-        .play{
+        .toPlay{
           border-width: 10px 0px 10px 14px;
           border-left-color:white;
         }
         /*暂停*/
-        .pause{
+        .toPause{
           width: 4px;
           height: 20px;
           border-width: 0px 5px;
@@ -174,7 +186,6 @@
         /*上下曲按键*/
         .last,.next{
           margin-bottom: 13px;
-          position:relative;
           border-color:transparent white;
         }
         .last{
@@ -185,76 +196,70 @@
         }
         .last::before,.next::after{
           height:14px;
-          position:absolute;
           content: '.';
           color:white;
           background-color: white;
+          top:-7px;
         }
         .last::before{
-          top:-7px;
           left:-2px;
         }
         .next::after{
-          top:-7px;
           right:-2px;
         }
-        .volumn,.volumn::before,.volumn::after{
+
+        .volume,.volume::before,.volume::after{
            border-width:10px 21px 10px 0px;
            border-radius:50%;
          }
-        .volumn{
-          position:relative;
+        .volume{
           border-right-color:white;
           margin-right: 2px;
         }
 
-        .volumn::before,.volumn::after{
-          /*display: block;*/
+        .volume::before,.volume::after{
           content:'';
           border-style: solid;
           border-color: transparent white;
-          position: absolute;
           top:-10px;
           left:0px;
 
         }
-        .volumn::before{
+        .volume::before{
           border-right-color: rgba(0,0,0,0.4);
           border-width:10px 18px 10px 0px;
         }
-        .volumn::after{
+        .volume::after{
           border-right-width:16px;
         }
-        .volumnBar{
+        .volumeBar{
           display: inline-block;
-          width: 20%;
+          width: 55px;
           height: 2px;
           margin: 19px 10px 19px 0px;
         }
 
-        .topList,.topList::before,.topList::after{
-          width:5px;
+        .topList{
+          width:4px;
+          height:20px;
           border-width:1px;
           border-color:white;
-          background: rgba(255,255,255,1);
-        }
-        .topList{
-          position:relative;
-          height:20px;
-          margin-bottom:12px;
+          background-color: white;
         }
         .topList::before,.topList::after{
           content:'';
-          position:absolute;
+          width:inherit;
+          border:inherit;
+          background-color: inherit;
           bottom:-1px;
         }
         .topList::before{
-          height:15px;
-          left:-7px;
+          height:70%;
+          left:calc(-150% - 2px);
         }
         .topList::after{
-          height:10px;
-          right:-7px;
+          height:45%;
+          right:calc(-150% - 2px);
         }
         section:last-child{
           height:305px;
@@ -263,7 +268,6 @@
         }
         /*各种功能的图标*/
         .search{
-          position: relative;
           width:16px;
           height:16px;
           border:2px solid white;
@@ -271,17 +275,15 @@
         }
         .search::after{
           content:'';
-          position:absolute;
           display: inline-block;
-          width:6px;
+          width:47%;
           height:3px;
           background-color: white;
           transform:rotateZ(45deg);
-          bottom:-3px;
-          right:-4px;
+          top:90%;
+          left:80%;
         }
         .playList{
-          position:relative;
           width:19px;
           height:19px;
           border:2px solid white;
@@ -289,7 +291,6 @@
         }
         .playList::before,.playList::after{
           content:'';
-          position:absolute;
           height:2px;
           background-color: white;
           transform-origin: left;
@@ -297,24 +298,22 @@
           left:9px;
         }
         .playList:before{
-          width:8px;
+          width:45%;
           transform:rotateZ(-90deg);
         }
         .playList::after{
-          width:5px;
+          width:27%;
           transform:rotateZ(35deg);
         }
         .collect{
-          position:relative;
-          width:13px;
-          height:13px;
+          width:14px;
+          height:14px;
           border-width:0px;
           background-color:white;
-          transform:rotateZ(45deg);
+          transform:rotateZ(45deg) translateY(50%);
         }
         .collect::before,.collect::after{
           content:'';
-          position:absolute;
           display: inline-block;
           width:100%;
           height:100%;
@@ -326,28 +325,35 @@
           left:-50%;
         }
         .collect::after{
+          left:0%;
           top:-50%;
         }
-        /*.collect{*/
-          /*position:relative;*/
-          /*border-color:white;*/
-          /*border-width:6px;*/
-          /*transform: rotateZ(45deg);*/
-        /*}*/
-        /*.collect::before,.collect::after{*/
-          /*position:absolute;*/
-          /*content:'';*/
-          /*border:6px solid white;*/
-          /*border-radius:50%;*/
-        /*}*/
-        /*.collect::before{*/
-          /*top:-6px;*/
-          /*left:-14px;*/
-        /*}*/
-        /*.collect::after{*/
-          /*top:-14px;*/
-          /*left:-6px;*/
-        /*}*/
+        #choice{
+          display: flex;
+          justify-content: space-between;
+        }
+        #choice>span{
+          flex:1;
+          display: inline-block;
+          height:23px;
+          padding:5px;
+          text-align: center;
+          transition:all ease-in-out 0.5s;
+        }
+        #choice>span:nth-child(2){
+          flex-basis: 50%;
+          background-color: rgba(0,0,0,0.5);
+        }
+        #search{
+          width: 75%;
+          border:1px solid white;
+          border-radius:8px;
+          padding:0px 4px;
+          margin-right:1%;
+          background-color: rgba(255,255,255,0);
+          outline: none;
+        }
+
         /*歌曲列表*/
         #list{
           height:265px;
@@ -415,12 +421,12 @@
             <p id="title"><span class="songInfo">告白气球</span><span class="songInfo">周杰伦</span></p>
           </div>
           <div id="controlArea">
-              <div class="controls progressBar"><div></div></div>
+              <div class="controls progressBar"><div title="hello" data-modifiable="true"><span class="barEnd"></span></div></div>
               <span class="controls icons last"></span>
-              <span id="playBt" class="controls icons play"></span>
+              <span class="controls icons playBt toPlay"></span>
               <span class="controls icons next"></span>
-              <span class="controls icons volumn"></span>
-              <div class="controls progressBar volumnBar"><div></div></div>
+              <span class="controls icons volume"></span>
+              <div class="controls progressBar volumeBar"><div title="hello"><span class="barEnd"></span></div></div>
               <span class="controls icons topList"></span>
           </div>
       </div>
@@ -428,11 +434,12 @@
 
   <!--列表部分-->
   <section>
-      <div>
-        <span id="topList" class="icons topList"></span>
-        <input type="text" id="search"/><span class="icons search"></span>
-        <span id="playList" class="icons playList"></span>
-        <span id="collect" class="icons collect"></span>
+      <div id="choice">
+        <span><span id="topList" class="icons topList"></span></span>
+        <!--<input type="text" id="search"/>-->
+        <span><input type="text" id="search"/><span class="icons search"></span></span>
+        <span><span id="playList" class="icons playList"></span></span>
+        <span><span id="collect" class="icons collect"></span></span>
       </div>
       <div id="list">
         <ul>
@@ -448,5 +455,5 @@
 </div>
 </body>
 <script src="js/frontHandler.js"></script>
-<!--<script src="js/test1.js"></script>-->
+<script src="js/eventBinding.js"></script>
 </html>
