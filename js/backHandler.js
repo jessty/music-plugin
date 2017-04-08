@@ -6,6 +6,9 @@ function BackHandler(player,storage,network,sharedData) {
   this.storage = storage;
   this.network = network;
   this.sharedData = sharedData;
+  function reposneWrap(code,data) {
+    response({code:code,data:data});
+  }
 }
 BackHandler.prototype = {
 
@@ -20,12 +23,14 @@ BackHandler.prototype = {
     });
   },
   //通信转发路由
-  router:function(message,sender,response){
-    console.log(this);
+  router:function(message,sender,responseCore){
+    function response(code,data) {
+      responseCore({code:code,data:data});
+    }
     switch (message.handler)
     {
-      case 'createUI':this.createUI(response);break;
-      case 'search':this.searchHandler(message.key,message.page,response); console.log('search connect');break;//search
+      case 'createUI':this.createUI(response); console.log('createUI connect');break;
+      case 'search':this.searchHandler(message,response); console.log('search connect');break;//search
       case 'topList':this.getTopListHandler(message,response);console.log('topList connect');break;//get top songs' list
       case 'collect':this.collectionsHandler(message,response);console.log('collect connect');break;//get collections
       case 'playList':this.playListHandler(message,response);console.log('playList connect');break;//处理播放列表相关的操作：1.点击歌曲时，选其所在列表作为播放列表
@@ -36,27 +41,39 @@ BackHandler.prototype = {
     return true;
   },
   createUI:function(response){
-    var UIInfo = {
+    var UIInfo = {        // 修改  加code？
       type:'createUI',
       song:this.player.playingSong,
       progress:this.player.progress,
       volume:this.player.volume,
       paused:this.player.paused
     };
-    response(UIInfo);
+    response(200,UIInfo);
   },
   //搜索处理器，主要进行异常处理和过滤
-  searchHandler:function (key,page,response) {
+  searchHandler:function (msg,response) {
     try{
-      if(page == 1)
-        this.sharedData.searchResult = undefined;                          //把搜索第一页结果，都当作新请求，清空之前的搜索结果
-      this.network.search(key,page,response);                          //search songs ，传入sendResponse以便得到结果后返回数据给页面
+      if(msg.page == 1){
+        this.sharedData.searchResult = undefined;     //把搜索第一页结果，都当作新请求，清空之前的搜索结果
+        this.network.search(msg.key,msg.page,response);
+      }else{
+        let begin = (msg.page - 1)*8;
+        let end = begin + 7;
+        let lastIndex = this.sharedData.searchResult.length - 1;
+        if(begin <= lastIndex){
+          end = (end <= lastIndex ? end : lastIndex);
+          response(200,this.sharedData.searchResult.slice(begin,end+1));   // 若缓存中有足够的数据，则从缓存中获取
+        }else{
+          this.network.search(msg.key,msg.page,response);     // 否则，发送网络请求，获取更多的数据
+        }
+      }
+
     }
     catch (e){
       switch(e.message)
       {
-        case 'timeout':response('“我一步一步往上爬”----网络儿哼唱');break;
-        case 'error':response('网络儿罢工了！');break;
+        case 'timeout':response(504,[]);break;
+        case 'error':response(502,[]);break;
       }
     }
   },
@@ -67,60 +84,69 @@ BackHandler.prototype = {
       if (this.sharedData.topList === undefined || this.sharedData.topList.length === 0) {//没有topLsit数据，尝试获取
         this.network.getTopList(response, 1);
       }
-      else if(msg.page == 1){                                            //有topList数据，若只要第一页，则把已缓存的数据直接返回
-        response(this.sharedData.topList);
-      }else{
-        this.network.getTopList(response, msg.page);                      //有topList数据，若要其他页，尝试获取
+      else {
+        let begin = (msg.page - 1)*8;
+        let end = begin + 7;
+        let lastIndex = this.sharedData.topList.length - 1;
+        if(begin <= lastIndex){
+          end = (end <= lastIndex ? end : lastIndex);
+          response(200,this.sharedData.topList.slice(begin,end+1));   // 若缓存中有足够的数据，则从缓存中获取
+        }else{
+          this.network.getTopList(response, msg.page);     // 否则，发送网络请求，获取更多的数据
+        }
       }
     }catch (e){
       switch(e.message)
       {
-        case 'timeout':response('“我一步一步往上爬”----网络儿哼唱');break;
-        case 'error':response('网络儿罢工了！');break;
+        case 'timeout':response(504,[]);break;
+        case 'error':response(502,[]);break;
       }
     }
   },
 
   //关于收藏的处理器
-  collectionsHandler:function (message,response) {
-    if(message.do === 'add'){                                        //添加歌曲到收藏夹
-      this.storage.collect(message.song,response);
+  collectionsHandler:function (msg,response) {
+    if(msg.do === 'add'){                                        //添加歌曲到收藏夹
+      this.storage.collect(msg.song,response);
       return;
     }
 
-    if(message.do === 'delete'){                                     //从收藏夹删歌曲
-      this.storage.abandon(message.songID,response);
+    if(msg.do === 'delete'){                                     //从收藏夹删歌曲
+      this.storage.abandon(msg.songID,response);
       return;
     }
 
-    var responseFilter = function(result){
-      if(result.length == 0){                                        //加载收藏夹时，对结果进行筛选
-        response('收藏夹空空的，正饥渴地望着你~~');
+    var responseFilter = function(list){
+      if(list.length == 0){                                        //收藏夹为空时，返回空数组
+        response(200,[]);
       }else{
-        response(result);
+        let begin = (msg.page - 1)*8;
+        let end = begin + 7;
+        let lastIndex = list.length - 1;
+        if(begin <= lastIndex){
+          end = (end <= lastIndex ? end : lastIndex);
+          response(200,list.slice(begin,end+1));
+        }else{
+          response(200,[]);                                        //收藏夹没更多未显示的数据时，返回空数组
+        }
       }
     };
-    if(message.do === 'load'){
-      if(this.sharedData.collections === undefined){
+    if(msg.do === 'load'){
+      if(!this.sharedData.collections)
         this.storage.load(responseFilter);
-      }
-      else if(this.sharedData.collections.length==0){
-        response('收藏夹空空的，正饥渴地望着你~~');
-      }
-      else{
-        response(this.sharedData.collections);
-      }
+      else
+        responseFilter(this.sharedData.collections);
     }
   },
 
   //专门用于操作播放列表
-  playListHandler:function (message,response){
-    switch(message.do)
+  playListHandler:function (msg,response){
+    switch(msg.do)
     {
-      case 'play':this.player.playOnList(message.list,message.index);break;
-      case 'add':this.player.addToPlay(message.list,message.index,response);break;
-      case 'delete':this.player.notToPlay(message.index,response);break;
-      case 'load':this.player.getPlayList(response);break;
+      case 'play':this.player.playOnList(msg.list,msg.index,response);break;
+      case 'add':this.player.addToPlay(msg.list,msg.index,response);break;
+      case 'delete':this.player.notToPlay(msg.index,response);break;
+      case 'load':this.player.getPlayList(msg.page,response);break;
     }
   },
 
@@ -134,6 +160,6 @@ BackHandler.prototype = {
       case 'volume':this.player.volume = message.value;break;
       case 'progress':this.player.progress = message.value;break;
     }
-    response();
+    response(200,'对播放器设置成功');
   }
 }

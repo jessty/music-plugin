@@ -8,14 +8,14 @@ function Storage(sharedData){
 Storage.prototype = {
   collections:[],
   // 收藏歌曲
-  collect:function (song,callback) {
+  collect:function (song,callback) {    // 修改  不传输song数据 传type和index？
     var obj = {};
     if('songID' in song)
       obj[song.songID] = song;
     else
       obj[song.songSrc] = song;
-    chrome.storage.local.set(obj,function () {
-      callback('歌曲已收藏');
+    chrome.storage.local.set(obj,e => {
+      callback(200,[]);
       this.$sharedData.collections = this.collections = undefined;//缓存的收藏夹设为失效
       console.log('collect OK!');
     });
@@ -23,8 +23,8 @@ Storage.prototype = {
 
   // 从收藏列表中移除歌曲
   abandon:function (id,callback) {
-    chrome.storage.local.remove(id,function () {
-      callback('歌曲已删除');
+    chrome.storage.local.remove(id,e => {
+      callback(200,[]);
       this.$sharedData.collections = this.collections = undefined;//缓存的收藏夹设为失效
       console.log('abandon OK');
     });
@@ -37,7 +37,7 @@ Storage.prototype = {
       for(var item in obj){
         this.collections.push(obj[item]);
       }
-      if(callback !== undefined)
+      if(callback)
         callback(this.collections);
       this.$sharedData.collections = this.collections;
     };

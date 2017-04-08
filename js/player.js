@@ -19,18 +19,21 @@ function Player(sharedData){
 
   //获取歌曲媒体数据，如时长等
   this.audio.onloadedmetadata = e => {
-    console.log(this.audio.duration);
+    console.log('metadata: '+this.audio.duration);
   };
 
   //不断向UI更新进度
   this.audio.ontimeupdate = e => {
     try{
       chrome.runtime.sendMessage({
+        code:200,
+        data:{
           type:'changeTime',
           currentTime:this.audio.currentTime,
           progress:this.progress//有null出现！！！！！！！！！！！！
-        },function (response) {
-          console.log(response);
+        }
+      },function (response) {
+            console.log(response);
       });
     }catch(e){
       //do nothing
@@ -70,13 +73,16 @@ Player.prototype = {
       this.playingSong = this.playList[this.$playSongIndex];
       try{
         chrome.runtime.sendMessage({
+          code:200,
+          data:{    // 修改  加code？
             type:'changeSong',
             song:this.playingSong,
             progress:0,
             volume:this.volume,
             paused:false
-          },function (response) {
-            console.log(response);
+          }
+        },function (response) {
+          console.log(response);
         });
       }catch(e){
         //do nothing
@@ -86,13 +92,16 @@ Player.prototype = {
       this.playingSong = this.errorSong;
       try{
         chrome.runtime.sendMessage({
+          code:500,
+          data:{    // 修改  加code？
             type:'changeSong',
             song:this.errorSong,
             progress:0,
             volume:this.volume,
             paused:true
-          },function (response) {
-            console.log(response);
+          }
+        },function (response) {
+          console.log(response);
         });
       }catch(e){
         //do nothing
@@ -150,7 +159,7 @@ Player.prototype = {
   },
 
   //选择歌曲列表作为播放列表，并播放所选歌曲
-  playOnList:function (listName,index) {
+  playOnList:function (listName,index,callback) {
     if(listName in this.$sharedData && this.$sharedData[listName] instanceof Array){
       // 、、playList在sharedData变化时，要不要也变化，如果要变化，如何实现同步
       //选同一个列表另一首歌时，下面的本不需再做，playList不用再重新赋值更新
@@ -158,7 +167,9 @@ Player.prototype = {
         return el;
       });
       this.playSongIndex = index;
+      callback(200,'歌曲已播放')
     }else{
+      callback(500,'歌曲播放出错');
       new Error('playList error');
     }
   },
@@ -167,22 +178,34 @@ Player.prototype = {
     if(listName in this.$sharedData && this.$sharedData[listName] instanceof Array){
       //this.playSongIndex 初始值是？？当列表为空时添加歌曲有问题
       this.playList.splice(this.playSongIndex+1,0,this.$sharedData[listName][index]);
-      callback('已添加到播放列表');
+      callback(200,'已添加到播放列表');
     }else{
+      callback(500,'添加到播放列表出错');
       new Error('add to playList error');
     }
   },
   //从播放列表删除歌曲
   notToPlay:function (index,callback) {
     this.playList.splice(index,1);
-    callback('OK,delete');
+    callback(200,'已从播放列表删除');
   },
   //获取播放列表
-  getPlayList:function(callback){
-    if(this.playList.length === 0){
-      callback('There isn\'t a song to be played');
+  getPlayList:function(page,response){
+    let length = this.playList.length;
+    if(length === 0){
+      response(200,[]);
     }
-    else callback(this.playList);
+    else {
+      let begin = (page - 1)*8;
+      let end = begin + 7;
+      let lastIndex = length - 1;
+      if(begin <= lastIndex){
+        end = (end <= lastIndex ? end : lastIndex);
+        response(200,this.playList.slice(begin,end+1));
+      }else{
+        response(200,[]);
+      }
+    }
   },
   //进度调整
   get progress(){

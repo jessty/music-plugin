@@ -4,7 +4,6 @@
 function Network(sharedData){
   //获取外界对象，以获得对它的操作权
   this.$sharedData = sharedData;
-  console.log(typeof this.testOnline)
   var that = this;
   function testOnline(){
       var xhr = new  XMLHttpRequest();
@@ -41,7 +40,6 @@ Network.prototype = {
     request.open(method,url);
     request.onload = function(){
       if(request.status === 200){
-        // console.log(request.responseText);
         filter(request.responseText);
       }else{
         throw new Error('404');
@@ -53,7 +51,7 @@ Network.prototype = {
     request.onerror = function () {
       throw new Error('error');
     };
-    if(data===undefined)
+    if(data === undefined)
       request.send(null);
     else
       request.send(data);
@@ -64,7 +62,7 @@ Network.prototype = {
     /////////////////Object Property//////////////////////////////////////
     var filter = function (responseData){
       responseData = JSON.parse(responseData);
-      var responseList = responseData.data.song.list;
+      var responseList = responseData.data.song.list;   //修改  加判断responseData是否为undefined
       var details = [];
       for(var i=0 ;i<responseList.length;i++){
         var song = {};
@@ -92,9 +90,8 @@ Network.prototype = {
 
       //回调，在该程序中，callback实际是chrome插件中用于页面通信的sendResponse
       //具体是chrome.runtime.onMessage.addListener(function(message,sender,sendResponse){})里的sendResponse
-      if(callback !== undefined)//决定是否回调，即把数据返回显示页面
-        callback(this.searchResult);
-
+      if(callback)//决定是否回调，即把数据返回显示页面
+        callback(200,this.searchResult);
       //修改外界对象（用于共享数据）
       if(this.$sharedData.searchResult === undefined)
         this.$sharedData.searchResult = this.searchResult;
@@ -112,31 +109,32 @@ Network.prototype = {
         'needNewCode=0&p='+page+'&catZhida=0&remoteplace=sizer.newclient.next_song&w='+keyword;
     this.request(url,'GET',filter);
   },
-// 、、、、、1.图片src处理，不用变为完整的地址；2.getTopList对数据的过滤提取要不要参照search，分成伴奏和非伴奏
+//修改
+//、、、、、1.图片src处理，不用变为完整的地址；2.getTopList对数据的过滤提取要不要参照search，分成伴奏和非伴奏
   getTopList:function (callback,page){
     this.topList = [];/////////////////Object Property//////////////////////////////////////
     var filter = function (responseData){
       responseData = JSON.parse(responseData);
       var songsList = responseData.songlist;
-      for(var i=0 ; i<songsList.length ; i++){
-        var song = {};
-        var eachSong = songsList[i].data;
-        song.album = eachSong.albumname;
-        song.songPic = eachSong.albummid;
-        song.songID = eachSong.strMediaMid;
-        song.time = eachSong.interval;
-        song.song = eachSong.songname;
-        song.singer = '';
-        // console.log(typeof songsList.singer);
-        for(var j=0 ; j<eachSong.singer.length ; j++){
-          song.singer += eachSong.singer[j].name + '&';
+      if(songsList){
+        for(var i=0 ; i<songsList.length ; i++){
+          var song = {};
+          var eachSong = songsList[i].data;
+          song.album = eachSong.albumname;
+          song.songPic = eachSong.albummid;
+          song.songID = eachSong.strMediaMid;
+          song.time = eachSong.interval;
+          song.song = eachSong.songname;
+          song.singer = '';
+          for(var j=0 ; j<eachSong.singer.length ; j++){
+            song.singer += eachSong.singer[j].name + '&';
+          }
+          song.singer = song.singer.substring(0,(song.singer.length-1));
+          this.topList.push(song);
         }
-        song.singer = song.singer.substring(0,(song.singer.length-1));
-        this.topList.push(song);
       }
-
-      if(callback !== undefined)//决定是否回调，即把数据返回显示页面
-        callback(this.topList);
+      if(callback)//决定是否回调，即把数据返回显示页面
+        callback(200,this.topList);
 
       //修改外界对象（用于共享数据）
       if(this.$sharedData.topList === undefined)
@@ -147,7 +145,6 @@ Network.prototype = {
           return array;
         },this.$sharedData.topList);
       }
-
     };
     // 把内部函数绑定到对象
     filter = filter.bind(this);

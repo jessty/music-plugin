@@ -1,7 +1,7 @@
 /**
  * Created by Y-Star on 2017/3/31.
  */
-var frontHandler;
+var frontHandler,UIManager;
 //控件click事件处理器
 function controlsClickHandler(e) {
   let classList = e.target.classList;
@@ -21,7 +21,7 @@ function controlsClickHandler(e) {
   }else if(classList.contains('topList')){     //处理列表展开
     document.querySelectorAll('section')[1].style.opacity = '1';
     document.getElementById('content').style.height = '600px';
-    frontHandler.showType = 'topList';
+    UIManager.showType = 'topList';
     console.log('click : open list');
   }else if(classList.contains('volume')){
     frontHandler.modifyBar('volume',0);
@@ -88,13 +88,13 @@ function barMDownHandler(e){
 function choiceClickHandler(e) {
   var classList = e.target.classList;
   if(classList.contains('topList')){
-    frontHandler.showType = 'topList';
+    UIManager.showType = 'topList';
     console.log('topList Click');
   }else if(classList.contains('playList')){
-    frontHandler.showType = 'playList';
+    UIManager.showType = 'playList';
     console.log('playList Click');
   }else if(classList.contains('collect')){
-    frontHandler.showType = 'collect';
+    UIManager.showType = 'collect';
     console.log('collect Click');
   }else if(classList.contains('search')){
 
@@ -107,19 +107,28 @@ function bindHandler(elId, type, handler) {
 }
 
 window.onload = function(){
+
+  UIManager = UIManagerClass.getInstance();
   frontHandler = FrontHandlerClass.getInstance();
   bindHandler('controlArea','click',controlsClickHandler);
   bindHandler('setting','mouseover',settingMOverHandler);
   bindHandler('setting','mouseleave',settingMLeaveHandler);
   bindHandler('setting','mousedown',barMDownHandler);
-  frontHandler.publicListen();
-  frontHandler.initializeUI();
-  document.getElementById('playList').onclick = function () {
-    frontHandler.showType = 'playList';
-    console.log('playList Click');
-  };
-  document.getElementById('collect').onclick = function () {
-    frontHandler.showType = 'collect';
-    console.log('collect Click');
-  };
+  bindHandler('choice','click',choiceClickHandler);
+  var root = document.getElementById('listWrapper');
+  var io = new IntersectionObserver(function(){
+    var page = Math.ceil(root.querySelector('ul').childNodes.length / 8 + 1);
+    UIManager.toLoadSongs(page);
+  },{
+    root:root
+  });
+  io.observe(document.getElementById('listBottom'));
+  // document.getElementById('playList').onclick = function () {
+  //   UIManager.showType = 'playList';
+  //   console.log('playList Click');
+  // };
+  // document.getElementById('collect').onclick = function () {
+  //   UIManager.showType = 'collect';
+  //   console.log('collect Click');
+  // };
 };
