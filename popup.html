@@ -20,7 +20,7 @@
           padding:1px;
         }
         section:first-child{
-          height:290px;
+          height:286px;
           overflow: hidden;
           /*position:absolute;*/
           
@@ -83,7 +83,7 @@
           width: 100%;
           height:60px;
           position:absolute;
-          top:232px;
+          top:228px;
           background-color: rgba(0,0,0,0);
           transition:background-color ease-in 0.3s 0.3s;
         }
@@ -264,6 +264,7 @@
         section:last-child{
           height:305px;
           opacity: 0;
+          background-color: rgba(0,0,0,0.4);
           transition: opacity ease 0.5s;
         }
         /*各种功能的图标*/
@@ -382,21 +383,52 @@
           /*transform:rotateX(180deg);*/
         }
         .songName-l,.singer-l{
-          margin:5px 10px 0px 10px;
+          padding:5px 10px 0px 10px;
           text-overflow: ellipsis;
           white-space: nowrap;
           overflow:hidden;
         }
         .songName-l{
-          color:black;
-          font-size:14px;
+          color:white;
+          font-size:13px;
           font-weight: 500;
         }
         .singer-l{
           display:inline-block;
-          width: 50%;
+          box-sizing:border-box;
+          width: 80%;
           color:grey;
           font-size:12px;
+        }
+        .songOperate{
+          display: inline-flex;
+          width:20%;
+          justify-content:space-around;
+        }
+        .songOperate>.collect{
+          height:9px;
+          width:9px;
+        }
+        /*单个歌曲项的小按钮：delete、addToPlay、collect*/
+        .delete,.addToplay{
+          border-width:0px;
+          width:1px;
+        }
+        .delete::before,.addToplay::before{
+          content: '';
+          height:inherit;
+          width:inherit;
+          background-color:inherit;
+          transform:rotate(90deg);
+        }
+        .delete{
+          height:13px;
+          background-color: red;
+          transform:rotate(45deg);
+        }
+        .addToplay{
+          height:12px;
+          background-color:white;
         }
         #animation{
           height:inherit;
@@ -451,7 +483,7 @@
           <li>
             <p class="songName-l">告白气球</p>
             <div class="singer-l">周杰伦 / 03:20</div>
-            <div><span class="like"></span><span class="addToplay"></span><span class="delete"></span></div>
+            <div class="songOperate"><span class="like"></span><span class="addToplay"></span><span class="delete"></span></div>
           </li>
         </ul>
         <div id="animation"></div>

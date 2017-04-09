@@ -58,10 +58,10 @@ var UIManagerClass = (function(){
     var $insertLis = function (data) {
       var lis = '',spans = '',singer = '';
       switch($type){
-        case 'topList': spans = '<span class="like"></span><span class="addToplay">';break;//列表中，歌曲项的delete（删除）按钮不显示
-        case 'search':  spans = '<span class="like"></span><span class="addToplay">';break;
-        case 'collect': spans = '<span class="addToplay"></span><span class="delete">';break;//列表中，歌曲项的like（收藏）按钮不显示
-        case 'playList':spans = '<span class="like"></span><span class="delete">';break;//列表中，歌曲项的addToPlay（下一曲播放）按钮不显示
+        case 'topList': spans = '<span class="icons collect" title="收藏"></span><span class="icons addToplay" title="待会播">';break;//列表中，歌曲项的delete（删除）按钮不显示
+        case 'search':  spans = '<span class="icons collect" title="收藏"></span><span class="icons addToplay" title="待会播">';break;
+        case 'collect': spans = '<span class="icons addToplay" title="待会播"></span><span class="icons delete" title="移除">';break;//列表中，歌曲项的like（收藏）按钮不显示
+        case 'playList':spans = '<span class="icons collect" title="收藏"></span><span class="icons delete" title="移除">';break;//列表中，歌曲项的addToPlay（下一曲播放）按钮不显示
       }
       data.forEach(function(e){
         singer = e.singer+' / '+parseInt(e.time/60)+':'+e.time%60;
@@ -69,8 +69,10 @@ var UIManagerClass = (function(){
         lis +=
             '<li>'+
             '<p class="songName-l">' + e.song + '</p>'+
-            '<div class="singer-l">' + singer + '</div>'+
-            '<div>' + spans + '</div>'+
+              '<div>'+
+                '<div class="singer-l">' + singer + '</div>'+
+                '<div class="songOperate">' + spans + '</div>'+
+              '</div>'+
             '</li>';
       });
       $list.insertAdjacentHTML('beforeend',lis);
