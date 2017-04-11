@@ -30,13 +30,13 @@ BackHandler.prototype = {
     switch (message.handler)
     {
       case 'createUI':this.createUI(response); console.log('createUI connect');break;
-      case 'search':this.searchHandler(message,response); console.log('search connect');break;//search
+      case 'searchResult':this.searchHandler(message,response); console.log('search connect');break;//search
       case 'topList':this.getTopListHandler(message,response);console.log('topList connect');break;//get top songs' list
-      case 'collect':this.collectionsHandler(message,response);console.log('collect connect');break;//get collections
+      case 'collections':this.collectionsHandler(message,response);console.log('collect connect');break;//get collections
       case 'playList':this.playListHandler(message,response);console.log('playList connect');break;//处理播放列表相关的操作：1.点击歌曲时，选其所在列表作为播放列表
         //2.添加歌曲为待会播放  3.从播放列表移除歌曲  4.获取播放列表
       case 'player':this.playerHandler(message,response);console.log('player connect');break;//设置player，如：上下曲，暂停播放，调整音量
-      default:console.log(message.type);response();
+      default:console.log('error in backHandler.router(): msg.Handler(' + $type + ')is error!');response();
     }
     return true;
   },

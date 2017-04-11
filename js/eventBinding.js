@@ -1,7 +1,7 @@
 /**
  * Created by Y-Star on 2017/3/31.
  */
-var frontHandler,UIManager;
+var frontHandler,UIManager,io;
 //控件click事件处理器
 function controlsClickHandler(e) {
   let classList = e.target.classList;
@@ -18,10 +18,14 @@ function controlsClickHandler(e) {
     let pausedBool = !classList.toggle('toPause');
     frontHandler.lastNextOrPause('paused',pausedBool);
     console.log('pausedBool'+pausedBool);
-  }else if(classList.contains('topList')){     //处理列表展开
-    document.querySelectorAll('section')[1].style.opacity = '1';
-    document.getElementById('content').style.height = '600px';
+  }else if(classList.contains('topList')){
     UIManager.showType = 'topList';
+    //处理列表展开
+    var section1 = document.querySelectorAll('section')[1];
+    section1.style.display = 'block';
+    section1.style.opacity = '1';
+    document.getElementById('content').style.height = '600px';
+
     console.log('click : open list');
   }else if(classList.contains('volume')){
     frontHandler.modifyBar('volume',0);
@@ -39,7 +43,7 @@ function settingMOverHandler(e) {
 //setting区域mouseleave事件处理器
 function settingMLeaveHandler(e) {
   e.target.style.backgroundColor = 'rgba(0,0,0,0)';
-  e.target.firstElementChild.style.bottom = '4px';
+  e.target.firstElementChild.style.bottom = '0px';
   e.target.lastElementChild.style.opacity = '0';
 }
 //进度条事件
@@ -47,7 +51,7 @@ function barMDownHandler(e){
   if(e.target.classList.contains('barEnd')){
     var innerBar = e.target.parentNode;
     var previousX = e.clientX, moveX = 0, currentX = 0;
-    var outerWidth = 0, innerWidth = 0, resultWidth = 0;
+    var outerWidth = 0, innerWidth = parseFloat(innerBar.style.width);
     outerWidth = parseFloat(window.getComputedStyle(innerBar.parentNode).width);
 
     //对于有'data-editable'属性的，设置该属性为'false'属性值
@@ -60,12 +64,14 @@ function barMDownHandler(e){
       //当移动的绝对值大于2时，才计算
       if(moveX<=-2||moveX>=2){
         // 取分子来算，例如取20%里的分子20
-        innerWidth = parseFloat(innerBar.style.width);
-        resultWidth = innerWidth + Math.ceil(moveX/outerWidth*10000)/100;
+        innerWidth += Math.ceil(moveX/outerWidth*10000)/100;
         // 限制innerWidth的width不超过outerWidth，即0<=resultWidth%<=1
-        if(0 <= resultWidth && resultWidth <= 100){
-          innerBar.style.width = resultWidth+'%';
+        if(0 <= innerWidth && innerWidth <= 100){
+          innerBar.style.width = innerWidth+'%';
           previousX = currentX;
+        }else{
+          // 把超出范围的innerWidth值修正为100或0
+          innerWidth = innerWidth>100?100:0;
         }
       }
     }
@@ -75,7 +81,7 @@ function barMDownHandler(e){
         doIt = 'volume';
       else
         doIt = 'progress';
-      frontHandler.modifyBar(doIt,resultWidth/100);
+      frontHandler.modifyBar(doIt,innerWidth/100);
       //对于有'data-editable'属性的，设置该属性为'true'属性值
       innerBar.dataset.modifiable&&(innerBar.dataset.modifiable = true);
       document.removeEventListener('mousemove', barMMoveHandler);
@@ -87,20 +93,48 @@ function barMDownHandler(e){
 
 function choiceClickHandler(e) {
   var classList = e.target.classList;
-  if(classList.contains('topList')){
-    UIManager.showType = 'topList';
-    console.log('topList Click');
-  }else if(classList.contains('playList')){
-    UIManager.showType = 'playList';
-    console.log('playList Click');
-  }else if(classList.contains('collect')){
-    UIManager.showType = 'collect';
-    console.log('collect Click');
-  }else if(classList.contains('search')){
+  // 只处理icons的click事件
+  if(!classList.contains('icons')) return;
+  var newType = classList[classList.length - 1];
+  if(UIManager.showType == newType)
+    UIManager.showType = newType;
+  else{
+    UIManager.showType = newType;
+    io.unobserve(document.getElementById('listBottom'));
+    io.observe(document.getElementById('listBottom'));
+  }
 
+
+  // if(classList.contains('topList')){
+  //   UIManager.showType = 'topList';
+  //   console.log('topList Click');
+  // }else if(classList.contains('playList')){
+  //   UIManager.showType = 'playList';
+  //   console.log('playList Click');
+  // }else if(classList.contains('collect')){
+  //   UIManager.showType = 'collect';
+  //   console.log('collect Click');
+  // }else if(classList.contains('search')){
+  //
+  // }
+
+}
+function listClickHandler(e){
+  var ele = e.target;
+  var listWrapper = e.currentTarget;
+
+  while(ele.tagName.toLowerCase() != 'li' && ele != listWrapper){
+    ele = ele.parentNode;
+  }
+  console.log('list click :' + ele)
+  if(ele != listWrapper){
+    let lis = listWrapper.querySelectorAll('li');
+    let index = [].indexOf.call(lis,ele);
+    UIManager.toPlayOnList(index);
+  }else{
+    e.stopPropagation();
   }
 }
-
 //通用事件绑定函数
 function bindHandler(elId, type, handler) {
   document.getElementById(elId).addEventListener(type,handler);
@@ -115,9 +149,13 @@ window.onload = function(){
   bindHandler('setting','mouseleave',settingMLeaveHandler);
   bindHandler('setting','mousedown',barMDownHandler);
   bindHandler('choice','click',choiceClickHandler);
+  bindHandler('listWrapper','click',listClickHandler);
   var root = document.getElementById('listWrapper');
-  var io = new IntersectionObserver(function(){
+  io = new IntersectionObserver(function(entries){
+    console.log('ratio: '+entries[0].intersectionRatio);
+    if(entries[0].intersectionRatio <= 0) return;
     var page = Math.ceil(root.querySelector('ul').childNodes.length / 8 + 1);
+    console.log('page: '+page);
     UIManager.toLoadSongs(page);
   },{
     root:root

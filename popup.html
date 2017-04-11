@@ -22,7 +22,7 @@
         section:first-child{
           height:286px;
           overflow: hidden;
-          /*position:absolute;*/
+          position:relative;
           
         }
         #background-blur{
@@ -80,23 +80,24 @@
           border-radius: 50%;
         }
         #setting{
+          margin-left: -1px;
           width: 100%;
           height:60px;
           position:absolute;
-          top:228px;
+          bottom:0px;
           background-color: rgba(0,0,0,0);
           transition:background-color ease-in 0.3s 0.3s;
         }
         .cover{
           position:absolute;
           width: 100%;
-          height:58px;
-          bottom: 4px;
+          height:inherit;
+          bottom: 0px;
           z-index:1;
           transition:bottom ease-in-out 0.5s;
         }
         .cover>div{
-          height:26px;
+          height:28px;
         }
         #title{
           text-align: center;
@@ -123,6 +124,8 @@
         }
         /*播放控件*/
         #controlArea{
+          overflow: hidden;
+          height:inherit;
           text-align: center;
           transition:opacity ease-in-out 0.3s 0.3s;
           opacity:0;
@@ -148,6 +151,7 @@
           border-width:2px 0px;
           border-style:solid;
           border-color:transparent;
+          margin-top: 7px;
           margin-bottom:0px;
           background-color: rgba(0,0,0,0.3);
           background-clip:content-box;
@@ -262,6 +266,8 @@
           right:calc(-150% - 2px);
         }
         section:last-child{
+          /*默认不显示列表部分*/
+          display: none;
           height:305px;
           opacity: 0;
           background-color: rgba(0,0,0,0.4);
@@ -382,6 +388,9 @@
           transition:all ease-in-out 0.6s;
           /*transform:rotateX(180deg);*/
         }
+        #listWrapper>ul{
+          display: none;
+        }
         .songName-l,.singer-l{
           padding:5px 10px 0px 10px;
           text-overflow: ellipsis;
@@ -397,7 +406,7 @@
           display:inline-block;
           box-sizing:border-box;
           width: 80%;
-          color:grey;
+          color: #dddddd;
           font-size:12px;
         }
         .songOperate{
@@ -406,13 +415,13 @@
           justify-content:space-around;
         }
         .songOperate>.collect{
-          height:9px;
-          width:9px;
+          height:8px;
+          width:8px;
         }
         /*单个歌曲项的小按钮：delete、addToPlay、collect*/
         .delete,.addToplay{
           border-width:0px;
-          width:1px;
+          width:2px;
         }
         .delete::before,.addToplay::before{
           content: '';
@@ -423,7 +432,7 @@
         }
         .delete{
           height:13px;
-          background-color: red;
+          background-color: white;
           transform:rotate(45deg);
         }
         .addToplay{
@@ -431,12 +440,15 @@
           background-color:white;
         }
         #animation{
-          height:inherit;
+          display: block;
+          height:calc(100% - 5px);
           width:inherit;
           background-color: chartreuse;
         }
         /*列表底部的结束线*/
         #listBottom{
+          color:white;
+          font-size: 12px;
           padding:1px 0px;
           border-top: 1px solid #5a5a5a;
           text-align: center;
@@ -474,17 +486,17 @@
       <div id="choice">
         <span><span id="topList" class="icons topList"></span></span>
         <!--<input type="text" id="search"/>-->
-        <span><input type="text" id="search"/><span class="icons search"></span></span>
+        <span><input type="text" id="search"/><span class="icons search searchResult"></span></span>
         <span><span id="playList" class="icons playList"></span></span>
-        <span><span id="collect" class="icons collect"></span></span>
+        <span><span id="collect" class="icons collect collections"></span></span>
       </div>
       <div id="listWrapper">
         <ul>
-          <li>
-            <p class="songName-l">告白气球</p>
-            <div class="singer-l">周杰伦 / 03:20</div>
-            <div class="songOperate"><span class="like"></span><span class="addToplay"></span><span class="delete"></span></div>
-          </li>
+          <!--<li>-->
+            <!--<p class="songName-l">告白气球</p>-->
+            <!--<div class="singer-l">周杰伦 / 03:20</div>-->
+            <!--<div class="songOperate"><span class="like"></span><span class="addToplay"></span><span class="delete"></span></div>-->
+          <!--</li>-->
         </ul>
         <div id="animation"></div>
         <div id="listBottom">loading . . .</div>

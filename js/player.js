@@ -45,7 +45,7 @@ function Player(sharedData){
 Player.prototype = {
   playingSong:{
     album:' ',
-    songPic:'./pics/notPlay.jpg',
+    songPic:'./pics/test.jpg',
     songID:' ',
     time:0,
     song:'~~',
@@ -53,7 +53,7 @@ Player.prototype = {
   },
   errorSong:{
     album:' ',
-    songPic:'./pics/errorSong.jpg',
+    songPic:'./pics/test.jpg',
     songID:' ',
     time:0,
     song:'~~',
@@ -168,8 +168,11 @@ Player.prototype = {
       });
       this.playSongIndex = index;
       callback(200,'歌曲已播放')
+    }else if(listName == 'playList') {
+      this.playSongIndex = index;
+      callback(200, '歌曲已播放')
     }else{
-      callback(500,'歌曲播放出错');
+      callback(500,'歌曲播放出错 '+listName);
       new Error('playList error');
     }
   },

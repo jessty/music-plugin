@@ -59,8 +59,8 @@ var UIManagerClass = (function(){
       var lis = '',spans = '',singer = '';
       switch($type){
         case 'topList': spans = '<span class="icons collect" title="收藏"></span><span class="icons addToplay" title="待会播">';break;//列表中，歌曲项的delete（删除）按钮不显示
-        case 'search':  spans = '<span class="icons collect" title="收藏"></span><span class="icons addToplay" title="待会播">';break;
-        case 'collect': spans = '<span class="icons addToplay" title="待会播"></span><span class="icons delete" title="移除">';break;//列表中，歌曲项的like（收藏）按钮不显示
+        case 'searchRsult':  spans = '<span class="icons collect" title="收藏"></span><span class="icons addToplay" title="待会播">';break;
+        case 'collections': spans = '<span class="icons addToplay" title="待会播"></span><span class="icons delete" title="移除">';break;//列表中，歌曲项的like（收藏）按钮不显示
         case 'playList':spans = '<span class="icons collect" title="收藏"></span><span class="icons delete" title="移除">';break;//列表中，歌曲项的addToPlay（下一曲播放）按钮不显示
       }
       data.forEach(function(e){
@@ -110,7 +110,7 @@ var UIManagerClass = (function(){
           //切换歌曲列表时，清空列表
           $clearList();
           //设置好歌曲列表的显示类型后，加载对应类型的列表
-          this.toLoadSongs(1);
+          // this.toLoadSongs(1);
         }
         document.getElementById('listWrapper').scrollTop = 0;//返回顶部
       },
@@ -126,12 +126,17 @@ var UIManagerClass = (function(){
           page:page
         };
         switch($type){
-          case 'search':{msg.key = $searchKey;};break;
-          case 'collect':{msg.do = 'load';};break;
+          case 'searchResult':{msg.key = $searchKey;};break;
+          case 'collections':{msg.do = 'load';};break;
           case 'playList':{msg.do = 'load';};break;
           case 'topList':;break;
+          default:console.log('error in UIManager.toLoadSongs(): choice type(' + $type + ')is error!');break;
         }
         $frontHandler.request(msg,$showResult);
+      },
+      toPlayOnList:function (index) {
+        var msg = {handler:'playList',do:'play',list:$type,index:index};
+        $frontHandler.request(msg,console.log);
       },
       //初始化UI界面
       initializeUI:function(){
