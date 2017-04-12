@@ -32,7 +32,7 @@
           z-index: -1;
           background-size: cover;
           background-repeat:no-repeat;
-          background-image: url("./pics/test.jpg");
+          /*background-image: url("");*/
           background-position: top center;
           filter:blur(70px);
           transition: background-image ease-in-out 0.3s;
@@ -41,7 +41,7 @@
           width:246px;
           height:246px;
           margin: 8px;
-          background-image: url("./pics/test.jpg");
+          /*background-image: url("");*/
           background-size:cover;
           background-origin: border-box;
           border:3px solid rgba(255,255,255,0.5);
@@ -419,11 +419,11 @@
           width:8px;
         }
         /*单个歌曲项的小按钮：delete、addToPlay、collect*/
-        .delete,.addToplay{
+        .delete,.addToPlay{
           border-width:0px;
           width:2px;
         }
-        .delete::before,.addToplay::before{
+        .delete::before,.addToPlay::before{
           content: '';
           height:inherit;
           width:inherit;
@@ -435,7 +435,7 @@
           background-color: white;
           transform:rotate(45deg);
         }
-        .addToplay{
+        .addToPlay{
           height:12px;
           background-color:white;
         }
@@ -492,11 +492,7 @@
       </div>
       <div id="listWrapper">
         <ul>
-          <!--<li>-->
-            <!--<p class="songName-l">告白气球</p>-->
-            <!--<div class="singer-l">周杰伦 / 03:20</div>-->
-            <!--<div class="songOperate"><span class="like"></span><span class="addToplay"></span><span class="delete"></span></div>-->
-          <!--</li>-->
+
         </ul>
         <div id="animation"></div>
         <div id="listBottom">loading . . .</div>

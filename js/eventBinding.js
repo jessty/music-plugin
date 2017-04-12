@@ -120,19 +120,34 @@ function choiceClickHandler(e) {
 
 }
 function listClickHandler(e){
-  var ele = e.target;
+  //ele是事件源对象  li是li元素，一开始为事件源对象，是因为事件源对象不一定是li元素，之后需要从事件源对象出发，沿DOM树找到事件源对象所处的li元素
+  var ele = e.target,li = ele;
   var listWrapper = e.currentTarget;
-
-  while(ele.tagName.toLowerCase() != 'li' && ele != listWrapper){
-    ele = ele.parentNode;
+  // 事件源对象的类名列表
+  var classList = ele.classList;
+  //li元素下标
+  var index;
+  while(li.tagName.toLowerCase() != 'li' && li != listWrapper){
+    li = li.parentNode;
   }
-  console.log('list click :' + ele)
-  if(ele != listWrapper){
-    let lis = listWrapper.querySelectorAll('li');
-    let index = [].indexOf.call(lis,ele);
-    UIManager.toPlayOnList(index);
-  }else{
+  console.log('list click :');
+  console.log(ele);
+  if(li == listWrapper){
     e.stopPropagation();
+    return;
+  }else{
+    let lis = listWrapper.querySelectorAll('li');
+    index = [].indexOf.call(lis,li);
+    if(classList.contains('icons')){
+      switch (classList[classList.length-1])
+      {
+        case 'collect':UIManager.toCollect(index,ele);break;
+        case 'addToPlay':UIManager.toAddToPlay(index,ele);break;
+        case 'delete':UIManager.toRemoveFromList(index,li);break;
+      }
+    }else{
+      UIManager.toPlayOnList(index);
+    }
   }
 }
 //通用事件绑定函数
@@ -152,10 +167,10 @@ window.onload = function(){
   bindHandler('listWrapper','click',listClickHandler);
   var root = document.getElementById('listWrapper');
   io = new IntersectionObserver(function(entries){
-    console.log('ratio: '+entries[0].intersectionRatio);
+    // console.log('ratio: '+entries[0].intersectionRatio);
     if(entries[0].intersectionRatio <= 0) return;
     var page = Math.ceil(root.querySelector('ul').childNodes.length / 8 + 1);
-    console.log('page: '+page);
+    // console.log('page: '+page);
     UIManager.toLoadSongs(page);
   },{
     root:root

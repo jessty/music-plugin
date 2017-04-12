@@ -58,9 +58,9 @@ var UIManagerClass = (function(){
     var $insertLis = function (data) {
       var lis = '',spans = '',singer = '';
       switch($type){
-        case 'topList': spans = '<span class="icons collect" title="收藏"></span><span class="icons addToplay" title="待会播">';break;//列表中，歌曲项的delete（删除）按钮不显示
-        case 'searchRsult':  spans = '<span class="icons collect" title="收藏"></span><span class="icons addToplay" title="待会播">';break;
-        case 'collections': spans = '<span class="icons addToplay" title="待会播"></span><span class="icons delete" title="移除">';break;//列表中，歌曲项的like（收藏）按钮不显示
+        case 'topList': spans = '<span class="icons collect" title="收藏"></span><span class="icons addToPlay" title="待会播">';break;//列表中，歌曲项的delete（删除）按钮不显示
+        case 'searchRsult':  spans = '<span class="icons collect" title="收藏"></span><span class="icons addToPlay" title="待会播">';break;
+        case 'collections': spans = '<span class="icons addToPlay" title="待会播"></span><span class="icons delete" title="移除">';break;//列表中，歌曲项的like（收藏）按钮不显示
         case 'playList':spans = '<span class="icons collect" title="收藏"></span><span class="icons delete" title="移除">';break;//列表中，歌曲项的addToPlay（下一曲播放）按钮不显示
       }
       data.forEach(function(e){
@@ -137,6 +137,36 @@ var UIManagerClass = (function(){
       toPlayOnList:function (index) {
         var msg = {handler:'playList',do:'play',list:$type,index:index};
         $frontHandler.request(msg,console.log);
+      },
+      toCollect:function (index, ele) {
+        var msg = {handler:'collections',do:'add',list:$type,index:index};
+        $frontHandler.request(msg,function (msg) {
+          if(msg && msg.code==200){
+            ele.style.backgroundColor = 'red';
+          }else{
+
+          }
+        });
+      },
+      toAddToPlay:function (index,ele) {
+        var msg = {handler:'playList',do:'add',list:$type,index:index};
+        $frontHandler.request(msg,function (msg) {
+          if(msg && msg.code==200){
+            ele.style.backgroundColor = 'red';
+          }else{
+
+          }
+        });
+      },
+      toRemoveFromList:function (index,ele) {
+        var msg = {handler:$type,do:'delete',index:index};
+        $frontHandler.request(msg,function (msg) {
+          if(msg && msg.code==200){
+            ele.style.backgroundColor = 'red';
+          }else{
+
+          }
+        });
       },
       //初始化UI界面
       initializeUI:function(){

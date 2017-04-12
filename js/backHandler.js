@@ -78,7 +78,7 @@ BackHandler.prototype = {
     }
   },
 
-  //排行榜处理器，主要进行异常处理和过滤
+  //排行榜处理器，主要进行异常处理
   getTopListHandler:function (msg,response) {
     try {
       if (this.sharedData.topList === undefined || this.sharedData.topList.length === 0) {//没有topLsit数据，尝试获取
@@ -107,12 +107,12 @@ BackHandler.prototype = {
   //关于收藏的处理器
   collectionsHandler:function (msg,response) {
     if(msg.do === 'add'){                                        //添加歌曲到收藏夹
-      this.storage.collect(msg.song,response);
+      this.storage.collect(msg.list,msg.index,response);
       return;
     }
 
     if(msg.do === 'delete'){                                     //从收藏夹删歌曲
-      this.storage.abandon(msg.songID,response);
+      this.storage.abandon(msg.index,response);
       return;
     }
 
@@ -127,15 +127,12 @@ BackHandler.prototype = {
           end = (end <= lastIndex ? end : lastIndex);
           response(200,list.slice(begin,end+1));
         }else{
-          response(200,[]);                                        //收藏夹没更多未显示的数据时，返回空数组
+          response(200,[]);                                        //没更多未显示的数据时，返回空数组
         }
       }
     };
     if(msg.do === 'load'){
-      if(!this.sharedData.collections)
-        this.storage.load(responseFilter);
-      else
-        responseFilter(this.sharedData.collections);
+      this.storage.load(responseFilter);
     }
   },
 

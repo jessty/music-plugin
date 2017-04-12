@@ -20,6 +20,7 @@ var FrontHandlerClass = (function(){
       modifyBar:function (choice,value) {
         this.request({handler:'player',do:choice,value:value},console.log);
       }
+
     };
   }
   var $instance = undefined;

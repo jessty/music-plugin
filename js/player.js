@@ -3,139 +3,57 @@
  */
 
 function Player(sharedData){
-  this.$sharedData = sharedData;
+  var $sharedData = sharedData,$playList = [];
+  $sharedData.playList = $playList;
+  var $playSongIndex = undefined;
+  var $notPlaySong = {
+    album:' ',
+    songPic:'./pics/notplay.jpg',
+    songID:' ',
+    time:0,
+    song:'no song',
+    singer:'is playing!'
+  };
+  var $errorSong = {
+    album:' ',
+    songPic:'./pics/errorSong.jpg',
+    songID:' ',
+    time:0,
+    song:'error',
+    singer:'occurred!'
+  };
+  var $playingSong = $notPlaySong;
 
   //核心播放器
-  this.audio = document.createElement('audio');
-  //监听播放结束事件 结束自动播放下一首（循环播放）
-  this.audio.onended = e =>{
-    this.playSongIndex = (this.$playSongIndex+1+this.playList.length)%this.playList.length;
-  };
-
-  //当歌曲缓冲到可以播放时，再播
-  this.audio.oncanplay = e => {
-    this.audio.play();
-  };
-
-  //获取歌曲媒体数据，如时长等
-  this.audio.onloadedmetadata = e => {
-    console.log('metadata: '+this.audio.duration);
-  };
-
-  //不断向UI更新进度
-  this.audio.ontimeupdate = e => {
-    try{
-      chrome.runtime.sendMessage({
-        code:200,
-        data:{
-          type:'changeTime',
-          currentTime:this.audio.currentTime,
-          progress:this.progress//有null出现！！！！！！！！！！！！
-        }
-      },function (response) {
-            console.log(response);
-      });
-    }catch(e){
-      //do nothing
-    }
-  };
-
-
-}
-Player.prototype = {
-  playingSong:{
-    album:' ',
-    songPic:'./pics/test.jpg',
-    songID:' ',
-    time:0,
-    song:'~~',
-    singer:'~~'
-  },
-  errorSong:{
-    album:' ',
-    songPic:'./pics/test.jpg',
-    songID:' ',
-    time:0,
-    song:'~~',
-    singer:'~~'
-  },
-  $playSongIndex:undefined,
-  playList:[],
-
-  //设置播放的歌曲Index，可用于上一首下一首切歌
-  get playSongIndex(){
-    return this.$playSongIndex;
-  },
-  set playSongIndex(newval){
-    this.$playSongIndex = (newval+this.playList.length)%this.playList.length;
-    try{
-      this.toplay(this.$playSongIndex);
-      this.playingSong = this.playList[this.$playSongIndex];
-      try{
-        chrome.runtime.sendMessage({
-          code:200,
-          data:{    // 修改  加code？
-            type:'changeSong',
-            song:this.playingSong,
-            progress:0,
-            volume:this.volume,
-            paused:false
-          }
-        },function (response) {
-          console.log(response);
-        });
-      }catch(e){
-        //do nothing
-      }
-    }
-    catch(e){//还要修改图标？？？？
-      this.playingSong = this.errorSong;
-      try{
-        chrome.runtime.sendMessage({
-          code:500,
-          data:{    // 修改  加code？
-            type:'changeSong',
-            song:this.errorSong,
-            progress:0,
-            volume:this.volume,
-            paused:true
-          }
-        },function (response) {
-          console.log(response);
-        });
-      }catch(e){
-        //do nothing
-      }
-    }
-  },
+  var $audio = document.createElement('audio');
 
   //准备播放（获取播放key、设置src、调用play()播放）
-  toplay:function (index) {
-    if(this.$sharedData.online == true){
+  function $toplay(index) {
+    if($sharedData.online == true){
       console.log('to  play');
-      if('songID' in this.playList[index]){
-        this.$playWithKey(this.playList[index].songID);
+      if('songID' in $playList[index]){
+        $playWithKey($playList[index].songID);
         console.log('play ID');
       }
       else{
-        this.audio.src = this.playList[index].songSrc;
-        this.audio.play();
+        $audio.src = $playList[index].songSrc;
+        $audio.play();
       }
     }
     else{
       throw new Error("toplay error");
     }
 
-  },
+  };
   //获取播放key
-  $playWithKey:function (songID){
+  function $playWithKey(songID){
     var callback = function (responseData){
       responseData = JSON.parse(responseData);
-      this.audio.src = 'http://cc.stream.qqmusic.qq.com/C100'+songID+'.m4a?vkey='+responseData.key+'&fromtag=0';
-      this.audio.play();
+      $audio.src = 'http://cc.stream.qqmusic.qq.com/C100'+songID+'.m4a?vkey='+responseData.key+'&fromtag=0';
+      $audio.play();
     };
     // 把内部函数绑定到对象,使回调函数可以操作对象的audio
-    callback = callback.bind(this);
+    // callback = callback.bind(this);
     var url = 'http://base.music.qq.com/fcgi-bin/fcg_musicexpress.fcg?' +
         'json=3&loginUin=0&format=json&inCharset=GB2312&outCharset=GB2312&notice=0&platform=yqq&needNewCode=0';
     var request = new XMLHttpRequest();
@@ -148,96 +66,204 @@ Player.prototype = {
       }
     };
     request.ontimeout = e => {
-      this.$sharedData.online = false;
+      $sharedData.online = false;
       // throw new Error('player.$playWithKey:net Error');
     };
     request.onerror = e => {
-      this.$sharedData.online = false;
+      $sharedData.online = false;
       // throw new Error('player.$playWithKey:net Error');
     };
     request.send(null);
-  },
+  };
 
-  //选择歌曲列表作为播放列表，并播放所选歌曲
-  playOnList:function (listName,index,callback) {
-    if(listName in this.$sharedData && this.$sharedData[listName] instanceof Array){
-      // 、、playList在sharedData变化时，要不要也变化，如果要变化，如何实现同步
-      //选同一个列表另一首歌时，下面的本不需再做，playList不用再重新赋值更新
-      this.playList = this.$sharedData[listName].map(function (el) {
-        return el;
-      });
-      this.playSongIndex = index;
-      callback(200,'歌曲已播放')
-    }else if(listName == 'playList') {
-      this.playSongIndex = index;
-      callback(200, '歌曲已播放')
-    }else{
-      callback(500,'歌曲播放出错 '+listName);
-      new Error('playList error');
-    }
-  },
-  //添加歌曲到播放列表
-  addToPlay:function (listName,index,callback) {
-    if(listName in this.$sharedData && this.$sharedData[listName] instanceof Array){
-      //this.playSongIndex 初始值是？？当列表为空时添加歌曲有问题
-      this.playList.splice(this.playSongIndex+1,0,this.$sharedData[listName][index]);
-      callback(200,'已添加到播放列表');
-    }else{
-      callback(500,'添加到播放列表出错');
-      new Error('add to playList error');
-    }
-  },
-  //从播放列表删除歌曲
-  notToPlay:function (index,callback) {
-    this.playList.splice(index,1);
-    callback(200,'已从播放列表删除');
-  },
-  //获取播放列表
-  getPlayList:function(page,response){
-    let length = this.playList.length;
-    if(length === 0){
-      response(200,[]);
-    }
-    else {
-      let begin = (page - 1)*8;
-      let end = begin + 7;
-      let lastIndex = length - 1;
-      if(begin <= lastIndex){
-        end = (end <= lastIndex ? end : lastIndex);
-        response(200,this.playList.slice(begin,end+1));
+  var $playerInterface = {
+    get playingSong(){//修改 统一正在播放的歌曲
+      return $playingSong;
+    },
+    //设置播放的歌曲Index，可用于上一首下一首切歌
+    get playSongIndex(){
+      return $playSongIndex;
+    },
+    set playSongIndex(newval){
+      try{
+        if(newval == undefined){
+          $playSongIndex = undefined;
+          $playingSong = $notPlaySong;
+        }
+        else{
+          $playSongIndex = (newval + $playList.length) % $playList.length;
+          $playingSong = $playList[this.playSongIndex];
+          $toplay(this.playSongIndex);
+        }
+        try{
+          chrome.runtime.sendMessage({
+            code:200,
+            data:{    // 修改  加code？
+              type:'changeSong',
+              song:$playingSong,
+              progress:0,
+              volume:this.volume,
+              paused:false
+            }
+          },function (response) {
+            console.log(response);
+          });
+        }catch(e){
+          //do nothing
+        }
+      }
+      catch(e){//还要修改图标？？？？
+        $playingSong = $errorSong;
+        try{
+          chrome.runtime.sendMessage({
+            code:500,
+            data:{    // 修改  加code？
+              type:'changeSong',
+              song:$errorSong,
+              progress:0,
+              volume:this.volume,
+              paused:true
+            }
+          },function (response) {
+            console.log(response);
+          });
+        }catch(e){
+          //do nothing
+        }
+      }
+    },
+
+    //选择歌曲列表作为播放列表，并播放所选歌曲
+    playOnList:function (listName,index,callback) {
+      if(listName in $sharedData && $sharedData[listName] instanceof Array){
+        // 、、playList在sharedData变化时，不要随之变化
+        //选同一个列表另一首歌时，下面的本不需再做，playList不用再重新赋值更新
+        $playList = $sharedData[listName].map(function (el) {
+          return el;
+        });
+        $sharedData.playList = undefined;
+        $sharedData.playList = $playList;
+        this.playSongIndex = index;
+        callback(200,'歌曲已播放')
+      }else if(listName == 'playList') {
+        this.playSongIndex = index;
+        callback(200, '歌曲已播放')
       }else{
+        callback(500,'歌曲播放出错 '+listName);
+        new Error('playList error');
+      }
+    },
+    //添加歌曲到播放列表
+    addToPlay:function (listName,index,callback) {
+      if(listName in $sharedData && $sharedData[listName] instanceof Array){
+        //this.playSongIndex 初始值是undefined，即没有正在播放的歌曲，意味着播放列表为空，为了增加用户体验，添加到空播放列表的第一首歌会自动播放
+        if(this.playSongIndex == undefined){
+          //由于this.playList与$sharedData.playList指向的是同一数组对象，所以两者是隐含着状态同步，此处的修改便不再操作$sharedData.playList
+          $playList.splice(0,0,$sharedData[listName][index]);
+          this.playSongIndex = 0;
+        }
+        else{
+          $playList.splice(this.playSongIndex + 1,0,$sharedData[listName][index]);
+        }
+        callback(200,'已添加到播放列表');
+      }else{
+        callback(500,'添加到播放列表出错');
+        new Error('add to playList error');
+      }
+    },
+    //从播放列表删除歌曲
+    notToPlay:function (index,callback) {
+      //如果移除的歌曲就是正在播放的歌曲，则先从列表移除出歌曲，再播放下一首歌
+      //把index下标的歌移除后，下一首歌前移，下标也是index（还要考虑下移除正在播放的歌是最后一首歌的情况）
+      if(this.playSongIndex == index){
+        $playList.splice(index,1);
+        //列表长度为0时，设置playSongIndex为undefined
+        this.playSongIndex = $playList.length == 0 ? undefined : (index % $playList.length);
+      }
+      else
+        $playList.splice(index,1);
+      callback(200,'已从播放列表删除');
+    },
+    //获取播放列表
+    getPlayList:function(page,response){
+      let length = $playList.length;
+      if(length === 0){
         response(200,[]);
       }
-    }
-  },
-  //进度调整
-  get progress(){
-    return this.audio.currentTime/this.audio.duration;
-  },
-  set progress(progress) {
-    this.audio.currentTime = progress*this.audio.duration;
-  },
-  // 调整音量
-  get volume(){
-    return this.audio.volume;
-  },
-  set volume(newValue){
-    if(newValue == 0)
-      this.audio.muted = true;
-    else if(this.audio.muted == true){
-      this.audio.muted = false;
-      this.audio.volume = newValue;
-    }
-    else{
-      this.audio.volume = newValue;
-    }
-  },
+      else {
+        let begin = (page - 1)*8;
+        let end = begin + 7;
+        let lastIndex = length - 1;
+        if(begin <= lastIndex){
+          end = (end <= lastIndex ? end : lastIndex);
+          response(200,$playList.slice(begin,end+1));
+        }else{
+          response(200,[]);
+        }
+      }
+    },
+    //进度调整
+    get progress(){
+      return $audio.currentTime / $audio.duration;
+    },
+    set progress(progress) {
+      $audio.currentTime = progress * $audio.duration;
+    },
+    // 调整音量
+    get volume(){
+      return $audio.volume;
+    },
+    set volume(newValue){
+      if(newValue == 0)
+        $audio.muted = true;
+      else if($audio.muted == true){
+        $audio.muted = false;
+        $audio.volume = newValue;
+      }
+      else{
+        $audio.volume = newValue;
+      }
+    },
 
-  //暂停与否（包含播放）
-  get paused(){
-    return this.audio.paused;
-  },
-  set paused(bool){
-    bool?this.audio.pause():this.audio.play();
-  }
-};
+    //暂停与否（包含播放）
+    get paused(){
+      return $audio.paused;
+    },
+    set paused(bool){
+      bool?$audio.pause():$audio.play();
+    }
+  };
+  //监听播放结束事件 结束自动播放下一首（循环播放）
+  $audio.onended = e =>{
+    $playerInterface.playSongIndex = ($playerInterface.playSongIndex + 1 + $playList.length) % $playList.length;
+  };
+
+  //当歌曲缓冲到可以播放时，再播
+  $audio.oncanplay = e => {
+    $audio.play();
+  };
+
+  //获取歌曲媒体数据，如时长等
+  $audio.onloadedmetadata = e => {
+    console.log('metadata: '+$audio.duration);
+  };
+
+  //不断向UI更新进度
+  $audio.ontimeupdate = e => {
+    try{
+      chrome.runtime.sendMessage({
+        code:200,
+        data:{
+          type:'changeTime',
+          currentTime:$audio.currentTime,
+          progress:$playerInterface.progress//有null出现！！！！！！！！！！！！
+        }
+      },function (response) {
+        console.log(response);
+      });
+    }catch(e){
+      //do nothing
+    }
+  };
+  return $playerInterface;
+}
