@@ -5,7 +5,9 @@ var UIManagerClass = (function(){
   function UIManager(frontHandler) {
     var $frontHandler = frontHandler;
     var $type = '';
-    var $searchKey = '';
+    var $chosenEle = document.getElementById('topList').parentElement;
+    var $choice = document.getElementById('choice');
+    var $searchKey = '告白气球';
     var $page = 0;
     var $list = document.getElementById('listWrapper').querySelector('ul');
     var $animation = document.getElementById('animation');
@@ -55,11 +57,11 @@ var UIManagerClass = (function(){
       }
     })();
     // 插入 列表项lis
-    var $insertLis = function (data) {
+    var $buildLis = function (data) {
       var lis = '',spans = '',singer = '';
       switch($type){
         case 'topList': spans = '<span class="icons collect" title="收藏"></span><span class="icons addToPlay" title="待会播">';break;//列表中，歌曲项的delete（删除）按钮不显示
-        case 'searchRsult':  spans = '<span class="icons collect" title="收藏"></span><span class="icons addToPlay" title="待会播">';break;
+        case 'searchResult':  spans = '<span class="icons collect" title="收藏"></span><span class="icons addToPlay" title="待会播">';break;
         case 'collections': spans = '<span class="icons addToPlay" title="待会播"></span><span class="icons delete" title="移除">';break;//列表中，歌曲项的like（收藏）按钮不显示
         case 'playList':spans = '<span class="icons collect" title="收藏"></span><span class="icons delete" title="移除">';break;//列表中，歌曲项的addToPlay（下一曲播放）按钮不显示
       }
@@ -75,29 +77,53 @@ var UIManagerClass = (function(){
               '</div>'+
             '</li>';
       });
-      $list.insertAdjacentHTML('beforeend',lis);
+      return lis;
     };
 
     //请求结果渲染函数
-    var $showResult = function (msg) {
+    var $showResult = function (toCover,msg) {
+      var lis = '';
       if(msg.code != 200){
         $listBottom.innerText = 'error!!!';
+        lis = '<li style="">'
       }else{
         var data = msg.data;
         if(data.length == 0){
           $listBottom.innerText = 'no more data!';
         }else
-          $insertLis(data);
+          lis = $buildLis(data,toCover);
       }
-      $list.style.display = 'block';
-      $animation.style.display = 'none';
+      if(toCover){$list.innerHTML = lis;
+        $list.style.animation = 'toggleListFromRight 0.3s ease-in-out 0.2s';
+        $list.style.animationFillMode = 'both';
+
+      }
+      else
+        $list.insertAdjacentHTML('beforeend',lis);
+
+      // $animation.style.display = 'none';
     };
+
     //列表类型切换时，用于清空列表和显示加载动画
-    var $clearList = function () {
-      $list.style.display = 'none';
-      $animation.style.display = 'block';
+    var $toggleList = function (newType) {
+
+      var currentChosenEle = $choice.querySelector('#'+newType).parentElement;
+      currentChosenEle.classList.toggle('chosen');
+      $chosenEle.classList.toggle('chosen');
+      if($type == 'searchResult'||newType == 'searchResult'){
+        if($type == 'searchResult'){
+          $chosenEle.firstElementChild.classList.toggle('searchHidden');
+        }else{
+          currentChosenEle.firstElementChild.classList.toggle('searchHidden');
+        }
+      }
+      $list.style.animation = 'toggleListToLeft 0.3s ease-in-out 0s';
+      $list.style.animationFillMode = 'both';
+      $chosenEle = currentChosenEle;
+      // $list.style.display = 'none';
+      // $animation.style.display = 'block';
       // $fragCache.appendChild($list);
-      $list.innerText = '';
+      // $list.innerText = '';
     };
     //公有属性、方法
     return {
@@ -105,14 +131,31 @@ var UIManagerClass = (function(){
         return $type;
       },
       set showType(newType){
-        if(newType != $type) {
-          $type = newType;
-          //切换歌曲列表时，清空列表
-          $clearList();
-          //设置好歌曲列表的显示类型后，加载对应类型的列表
-          // this.toLoadSongs(1);
+
+        if(newType == 'searchResult'){
+          //对searchResult类型进行专门处理，因为第一次点击search时，只是展示搜索框，还没有进行搜索，第二次点击才进行搜索；
+          // 第一、二次的不同，用$type与newType来区分；
+          // $type记录上一次选择的类型，若点击search按钮后，$type != 'searchResult',则是第一次点击
+          if($type == 'searchResult'){
+            $list.style.animation = 'toggleListToLeft 0.3s ease-in-out 0s';
+            $list.style.animationFillMode = 'both';
+            this.toLoadSongs(1);
+          }else{
+            $toggleList(newType);
+            $type = newType;
+          }
+        }else{
+          //对其他类型的处理
+          if(newType != $type) {
+            //切换歌曲列表时，清空列表
+            $toggleList(newType);
+            $type = newType;
+            //设置好歌曲列表的显示类型后，加载对应类型的列表
+            this.toLoadSongs(1);
+          }
+          document.getElementById('listWrapper').scrollTop = 0;//返回顶部
         }
-        document.getElementById('listWrapper').scrollTop = 0;//返回顶部
+
       },
       toListen:function () {
         if($frontHandler)
@@ -126,13 +169,14 @@ var UIManagerClass = (function(){
           page:page
         };
         switch($type){
-          case 'searchResult':{msg.key = $searchKey;};break;
+          case 'searchResult':{msg.key = $choice.querySelector('#searchResult').value;};break;
           case 'collections':{msg.do = 'load';};break;
           case 'playList':{msg.do = 'load';};break;
           case 'topList':;break;
           default:console.log('error in UIManager.toLoadSongs(): choice type(' + $type + ')is error!');break;
         }
-        $frontHandler.request(msg,$showResult);
+        var showResult = page==1 ? $showResult.bind(null,true):$showResult.bind(null,false);
+        $frontHandler.request(msg,showResult);
       },
       toPlayOnList:function (index) {
         var msg = {handler:'playList',do:'play',list:$type,index:index};

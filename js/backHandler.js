@@ -6,9 +6,9 @@ function BackHandler(player,storage,network,sharedData) {
   this.storage = storage;
   this.network = network;
   this.sharedData = sharedData;
-  function reposneWrap(code,data) {
-    response({code:code,data:data});
-  }
+  // function reposneWrap(code,data) {
+  //   response({code:code,data:data});
+  // }
 }
 BackHandler.prototype = {
 

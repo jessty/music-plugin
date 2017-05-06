@@ -49,6 +49,7 @@
           /*box-shadow:0px 0px 2px 2px rgba(255,255,255,0.5);*/
           /*animation:rotation 20s linear 0s infinite normal;*/
           /*启动硬件加速*/
+
           transform: translateZ(0);
           transition: background-image ease-in-out 0.3s;
         }
@@ -338,6 +339,7 @@
         #choice{
           display: flex;
           justify-content: space-between;
+          border-bottom:1px solid #9d9d9d;
         }
         #choice>span{
           flex:1;
@@ -346,21 +348,31 @@
           padding:5px;
           text-align: center;
           transition:all ease-in-out 0.5s;
+          border-bottom:1px solid transparent;
         }
-        #choice>span:nth-child(2){
-          flex-basis: 50%;
-          background-color: rgba(0,0,0,0.5);
+        .chosen{
+          flex-basis: 40% !important;
+          border-bottom-color: rgba(255,255,255,1) !important;
         }
-        #search{
+        #searchResult{
+          color:white;
+          font-size: 13px;
           width: 75%;
           border:1px solid white;
           border-radius:8px;
           padding:0px 4px;
-          margin-right:1%;
+          margin-right:2%;
+          margin-bottom:2px;
           background-color: rgba(255,255,255,0);
           outline: none;
+          vertical-align:bottom;
+          transition:all ease-in-out 0.5s;
         }
-
+        .searchHidden{
+          transform: scale(-0);
+          margin-left: -130%;
+          width:0%
+        }
         /*歌曲列表*/
         #listWrapper{
           height:265px;
@@ -380,7 +392,8 @@
         }
         /*单个歌曲列表项*/
         #listWrapper li{
-          border-top:1px solid #9d9d9d;
+          list-style-type: none;
+          border-bottom:1px solid #9d9d9d;
           height:50px;
           margin:1px;
           transform-origin: top;
@@ -389,10 +402,44 @@
           /*transform:rotateX(180deg);*/
         }
         #listWrapper>ul{
-          display: none;
+          /*display: none;*/
+          width:100%;
+        }
+
+        @keyframes toggleListToLeft{
+          0% {
+            margin-left:0%;
+          }
+          100% {
+            margin-left:-100%;
+          }
+        }
+        @keyframes toggleListToRight{
+          0% {
+            margin-left:0%;
+          }
+          100% {
+            margin-left:100%;
+          }
+        }
+        @keyframes toggleListFromLeft{
+          0% {
+            margin-left:-100%;
+          }
+          100% {
+            margin-left:0%;
+          }
+        }
+        @keyframes toggleListFromRight{
+          0% {
+            margin-left:100%;
+          }
+          100% {
+            margin-left:0%;
+          }
         }
         .songName-l,.singer-l{
-          padding:5px 10px 0px 10px;
+          padding:6px 10px 0px 10px;
           text-overflow: ellipsis;
           white-space: nowrap;
           overflow:hidden;
@@ -450,7 +497,6 @@
           color:white;
           font-size: 12px;
           padding:1px 0px;
-          border-top: 1px solid #5a5a5a;
           text-align: center;
         }
     </style>
@@ -484,17 +530,17 @@
   <!--列表部分-->
   <section>
       <div id="choice">
-        <span><span id="topList" class="icons topList"></span></span>
+        <span class="chosen"><span id="topList" class="icons topList"></span></span>
         <!--<input type="text" id="search"/>-->
-        <span><input type="text" id="search"/><span class="icons search searchResult"></span></span>
+        <span><input type="text" id="searchResult" class="searchHidden"/><span class="icons search searchResult"></span></span>
         <span><span id="playList" class="icons playList"></span></span>
-        <span><span id="collect" class="icons collect collections"></span></span>
+        <span><span id="collections" class="icons collect collections"></span></span>
       </div>
       <div id="listWrapper">
         <ul>
 
         </ul>
-        <div id="animation"></div>
+        <!--<div id="animation"></div>-->
         <div id="listBottom">loading . . .</div>
       </div>
   </section>
