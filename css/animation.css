@@ -1,0 +1,173 @@
+/*歌曲图片旋转动画*/
+@keyframes rotation {
+  0% {
+    transform: rotateZ(0deg);
+  }
+  50% {
+    transform: rotateZ(180deg);
+  }
+  100% {
+    transform: rotateZ(360deg);
+  }
+}
+
+/*列表切换动画相关的类*/
+.listToLeft{
+  animation: toggleListToLeft 0.5s ease-in-out 0s;
+}
+.listToRight{
+  animation: toggleListToRight 0.5s ease-in-out 0s;
+}
+@keyframes toggleListToLeft{
+  0% {
+    margin-left:0%;
+  }
+  50% {
+    margin-left:-100%;
+    opacity:0;
+  }
+  51% {
+    margin-left:100%;
+  }
+  100% {
+    margin-left:0%;
+    opacity:1;
+  }
+}
+@keyframes toggleListToRight{
+  0% {
+    margin-left:0%;
+  }
+  50% {
+    margin-left:100%;
+    opacity:0;
+  }
+  51% {
+    margin-left:-100%;
+  }
+  100% {
+    margin-left:0%;
+    opacity:1;
+  }
+}
+
+/*专属于search列表的切换动画*/
+.searchListToLeft{
+  animation: toggleSearchListToLeft 0.25s ease-in-out 0s;
+  animation-fill-mode:forwards;
+}
+.searchListToRight{
+  animation: toggleSearchListToRight 0.25s ease-in-out 0s;
+  animation-fill-mode:forwards;
+}
+
+@keyframes toggleSearchListToLeft{
+  0% {
+    margin-left:0%;
+  }
+  100% {
+    margin-left:-100%;
+    opacity:0;
+  }
+}
+@keyframes toggleSearchListToRight{
+  0% {
+    margin-left:0%;
+  }
+  100% {
+    margin-left:100%;
+    opacity:0;
+  }
+}
+/*专属于search列表的切换动画*/
+.searchListFromLeft{
+  animation: toggleSearchListFromLeft 0.25s ease-in-out 0.3s;
+  animation-fill-mode:both;
+}
+.searchListFromRight{
+  animation: toggleSearchListFromRight 0.25s ease-in-out 0.3s;
+  animation-fill-mode:both;
+}
+@keyframes toggleSearchListFromLeft{
+  /*0% {*/
+  /*margin-left:100%;*/
+  /*opacity: 0;*/
+  /*}*/
+  0%{
+    margin-left: -100%;
+    opacity: 0;
+  }
+  50% {
+    opacity: 0;
+  }
+  100% {
+    margin-left:0%;
+    opacity:1;
+  }
+}
+@keyframes toggleSearchListFromRight{
+  /*0% {*/
+  /*margin-left:-100%;*/
+  /*opacity:0;*/
+  /*}*/
+  0% {
+    margin-left:100%;
+    opacity:0;
+  }
+  50% {
+    opacity: 0;
+  }
+  100% {
+    margin-left:0%;
+    opacity:1;
+  }
+}
+
+/*删除列表项的动画*/
+.deleteLi{
+  animation:deleteLiAnimation 0.5s ease-out 0.2s;
+  animation-fill-mode:both;
+}
+@keyframes deleteLiAnimation {
+  /*0%{*/
+  /*margin-top:0px;*/
+  /*margin-bottom: 0px;*/
+  /*margin-left:0%;*/
+  /*}*/
+  /*20%{*/
+  /*margin-top:50px;*/
+  /*margin-bottom: -50px;*/
+  /*margin-left:20%;*/
+  /*}*/
+  /*40%{*/
+  /*margin-top:-35px;*/
+  /*margin-bottom: 35px;*/
+  /*margin-left:40%;*/
+  /*}*/
+  /*60%{*/
+  /*margin-top:25px;*/
+  /*margin-bottom: -25px;*/
+  /*margin-left:60%;*/
+  /*}*/
+  /*80%{*/
+  /*margin-top:-20px;*/
+  /*margin-bottom: 20px;*/
+  /*margin-left:80%;*/
+  /*}*/
+  /*100%{*/
+  /*margin-top:10px;*/
+  /*margin-bottom: -10px;*/
+  /*margin-left:100%;*/
+  /*}*/
+  0%{
+    margin-left:0%;
+    opacity:1;
+  }
+  100%{
+    margin-left:100%;
+    opacity: 0;
+    height:0px;
+    /*width:0%;*/
+    visibility: hidden;
+  }
+}

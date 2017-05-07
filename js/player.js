@@ -26,7 +26,7 @@ function Player(sharedData){
 
   //核心播放器
   var $audio = document.createElement('audio');
-
+  $audio.volume = 0.5;
   //准备播放（获取播放key、设置src、调用play()播放）
   function $toplay(index) {
     if($sharedData.online == true){

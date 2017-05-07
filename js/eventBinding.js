@@ -11,7 +11,7 @@ function controlsClickHandler(e) {
   } else if (classList.contains('next')) {    //处理next下一曲
     frontHandler.lastNextOrPause('next');
   } else if (classList.contains('playBt')) {   //处理播放或暂停
-                                               //切换类名，有该类名，则移除，并返回false；无则添加，并返回true
+    //切换类名，有该类名，则移除，并返回false；无则添加，并返回true
     classList.toggle('toPlay');
     //classList.toggle('toPause',true)返回true时，意味着有toPause类，音乐应该播放
     //audio的paused应该是false，所以对classList.toggle('toPause',true)取反
@@ -78,8 +78,10 @@ function barMDownHandler(e) {
 
     function barMUpHandler(e2) {
       var doIt = '';
-      if (innerBar.parentNode.classList.contains('volumeBar'))
+      if (innerBar.parentNode.classList.contains('volumeBar')){
         doIt = 'volume';
+        e.target.title = Math.round(innerWidth/10) + ' / 10';
+      }
       else
         doIt = 'progress';
       frontHandler.modifyBar(doIt, innerWidth / 100);
@@ -92,30 +94,27 @@ function barMDownHandler(e) {
   }
 }
 
-var choiceClickHandler = (function () {
-  var searchClick1st = true;
-  return function (e) {
-    var classList = e.target.classList;
-    // 只处理icons的click事件
-    if (!classList.contains('icons')) return;
-    let newType = '';
-    if (classList.contains('topList'))
-      newType = 'topList';
+var choiceClickHandler = function (e) {
+  var classList = e.target.classList;
+  // 只处理icons的click事件
+  if (!classList.contains('icons')) return;
+  let newType = '';
+  if (classList.contains('topList'))
+    newType = 'topList';
+  else {
+    if (classList.contains('playList'))
+      newType = 'playList';
     else {
-      if (classList.contains('playList'))
-        newType = 'playList';
+      if (classList.contains('collections'))
+        newType = 'collections';
       else {
-        if (classList.contains('collections'))
-          newType = 'collections';
-        else {
-          if (classList.contains('searchResult'))
-            newType = 'searchResult';
-        }
+        if (classList.contains('searchResult'))
+          newType = 'searchResult';
       }
     }
-    UIManager.showType = newType;
   }
-})();
+  UIManager.showType = newType;
+};
 function listClickHandler(e) {
   //ele是事件源对象  li是li元素，一开始为事件源对象，是因为事件源对象不一定是li元素，之后需要从事件源对象出发，沿DOM树找到事件源对象所处的li元素
   var ele = e.target;
@@ -180,7 +179,9 @@ window.onload = function () {
   bindHandler('choice', 'click', choiceClickHandler);
   bindHandler('listWrapper', 'click', listClickHandler);
   bindHandler('listWrapper', 'dblclick', listDblclickHandler);
-
+  bindHandler('searchResult','change',e=>{
+    UIManager.showType = 'searchResult';
+  });
   var root = document.getElementById('listWrapper');
   io = new IntersectionObserver(function (entries) {
     // console.log('ratio: '+entries[0].intersectionRatio);

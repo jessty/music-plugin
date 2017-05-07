@@ -9,6 +9,8 @@ var FrontHandlerClass = (function(){
       },
       listen:function (callback) {
         chrome.runtime.onMessage.addListener(function (msg, sender, sendMessage) {
+          // console.log('msg!!!');
+          // console.log(msg);
           callback(msg);
           return true;
         });

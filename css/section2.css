@@ -1,0 +1,201 @@
+section:last-child{
+  /*默认不显示列表部分*/
+  display: none;
+  height:310px;
+  opacity: 0;
+  background-color: rgba(0,0,0,0.4);
+  transition: opacity ease 0.5s;
+}
+/*各种功能的图标*/
+.search{
+  width:16px;
+  height:16px;
+  border:2px solid white;
+  border-radius:50%;
+}
+.search::after{
+  content:'';
+  display: inline-block;
+  width:47%;
+  height:3px;
+  background-color: white;
+  transform:rotateZ(45deg);
+  top:90%;
+  left:80%;
+}
+.playList{
+  width:19px;
+  height:19px;
+  border:2px solid white;
+  border-radius:50%;
+}
+.playList::before,.playList::after{
+  content:'';
+  height:2px;
+  background-color: white;
+  transform-origin: left;
+  top:9px;
+  left:9px;
+}
+.playList:before{
+  width:45%;
+  transform:rotateZ(-90deg);
+}
+.playList::after{
+  width:27%;
+  transform:rotateZ(35deg);
+}
+.collect{
+  width:14px;
+  height:14px;
+  border-width:0px;
+  background-color:white;
+  transform:rotateZ(45deg) translateY(50%);
+}
+.collect::before,.collect::after{
+  content:'';
+  display: inline-block;
+  width:100%;
+  height:100%;
+  border: inherit;
+  background-color: inherit;
+  border-radius: 50%;
+}
+.collect::before{
+  left:-50%;
+}
+.collect::after{
+  left:0%;
+  top:-50%;
+}
+#choice{
+  display: flex;
+  justify-content: space-between;
+  border-bottom:1px solid #9d9d9d;
+}
+#choice>span{
+  flex:1;
+  display: inline-block;
+  height:23px;
+  padding:5px;
+  text-align: center;
+  transition:all ease-in-out 0.5s;
+  border-bottom:1px solid transparent;
+}
+.chosen{
+  flex-basis: 40% !important;
+  border-bottom-color: rgba(255,255,255,1) !important;
+}
+#searchResult{
+  color:white;
+  font-size: 13px;
+  width: 75%;
+  border:1px solid white;
+  border-radius:8px;
+  padding:0px 4px;
+  margin-right:2%;
+  margin-bottom:2px;
+  background-color: rgba(255,255,255,0);
+  outline: none;
+  vertical-align:bottom;
+  transition:all ease-in-out 0.5s;
+}
+.searchHidden{
+  transform: scale(-0);
+  margin-left: -130%;
+  width:0%
+}
+/*歌曲列表*/
+#listWrapper{
+  height:259px;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+#listWrapper::-webkit-scrollbar{
+  width: 5px;
+}
+#listWrapper::-webkit-scrollbar-thumb{
+  border-radius:2px;
+  background-color: rgba(245,245,245,1);
+}
+#listWrapper::-webkit-scrollbar-track{
+  border-radius:2px;
+  background: rgba(68, 68, 68, 0.3);
+}
+/*单个歌曲列表项*/
+#listWrapper li{
+  list-style-type: none;
+  border-bottom:1px solid #9d9d9d;
+  height:50px;
+  margin:1px;
+  transform-origin: top;
+  backface-visibility: hidden;
+  transition:all ease-in-out 0.6s;
+  /*transform:rotateX(180deg);*/
+}
+#listWrapper>ul{
+  /*display: none;*/
+  width:100%;
+}
+
+.songName-l,.singer-l{
+  padding:6px 10px 0px 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow:hidden;
+}
+.songName-l{
+  color:white;
+  font-size:13px;
+  font-weight: 500;
+}
+.singer-l{
+  display:inline-block;
+  box-sizing:border-box;
+  width: 80%;
+  color: #dddddd;
+  font-size:12px;
+}
+.songOperate{
+  display: inline-flex;
+  width:20%;
+  justify-content:space-around;
+}
+.songOperate>.collect{
+  height:8px;
+  width:8px;
+}
+/*单个歌曲项的小按钮：delete、addToPlay、collect*/
+.delete,.addToPlay{
+  border-width:0px;
+  width:2px;
+}
+.delete::before,.addToPlay::before{
+  content: '';
+  height:inherit;
+  width:inherit;
+  background-color:inherit;
+  transform:rotate(90deg);
+}
+.delete{
+  height:13px;
+  background-color: white;
+  transform:rotate(45deg);
+}
+.addToPlay{
+  height:12px;
+  background-color:white;
+}
+#animation{
+  display: block;
+  height:calc(100% - 5px);
+  width:inherit;
+  background-color: chartreuse;
+}
+/*列表底部的结束线*/
+#listBottom{
+  color:white;
+  font-size: 12px;
+  padding:1px 0px;
+  text-align: center;
+}
