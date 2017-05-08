@@ -1,7 +1,7 @@
-##作品展示
-*播放界面
-![](./showing/GIF.gif)
-*列表界面
+##浣滃搧灞曠ず
+*鎾斁鐣岄潰
+<img src='./showing/GIF.gif' width='200px' height='300px'/>
+*鍒楄〃鐣岄潰
 ![](./showing/GIF1.gif)
-*列表切换动效
+*鍒楄〃鍒囨崲鍔ㄦ晥
 ![](./showing/GIF2.gif)
