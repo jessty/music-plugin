@@ -51,16 +51,19 @@ var UIManagerClass = (function(){
           progressBar.firstElementChild.title = '0 / ' + $wrapTime(data.song.time );
           volumeBar.style.width = data.volume * 100 + '%';
           volumeBar.firstElementChild.title = Math.round(data.volume*10) + ' / 10';
+          console.log(data);
+
+          //重新开始动画
+          pic.offsetHeight;
+          pic.style.animation = 'rotation ' + data.song.time / 2 + 's linear 0s infinite normal';
           if (!data.paused) {
             playBt.classList.remove('toPlay');
             playBt.classList.add('toPause');
           } else {
             playBt.classList.remove('toPause');
             playBt.classList.add('toPlay');
+            pic.style.animationPlayState = 'paused';
           }
-          //重新开始动画
-          pic.offsetHeight;
-          pic.style.animation = 'rotation ' + data.song.time / 2 + 's linear 0s infinite normal';
           totalTime = data.song.time;//存好当前播放的歌曲的总时间
         } else if (data.type == 'changeTime') {
           if(progressBar.dataset.modifiable == 'true'){

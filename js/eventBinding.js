@@ -17,6 +17,7 @@ function controlsClickHandler(e) {
     //audio的paused应该是false，所以对classList.toggle('toPause',true)取反
     let pausedBool = !classList.toggle('toPause');
     frontHandler.lastNextOrPause('paused', pausedBool);
+    document.getElementById('pic').style.animationPlayState = pausedBool ? 'paused' : 'running';
     console.log('pausedBool' + pausedBool);
   } else if (classList.contains('topList')) {
     UIManager.showType = 'topList';
